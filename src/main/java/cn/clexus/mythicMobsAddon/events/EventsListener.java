@@ -1,9 +1,6 @@
 package cn.clexus.mythicMobsAddon.events;
 
-import cn.clexus.mythicMobsAddon.addons.conditions.PoseCondition;
-import cn.clexus.mythicMobsAddon.addons.conditions.SameTeamCondition;
-import cn.clexus.mythicMobsAddon.addons.conditions.SitCondition;
-import cn.clexus.mythicMobsAddon.addons.conditions.TeamCondition;
+import cn.clexus.mythicMobsAddon.addons.conditions.*;
 import cn.clexus.mythicMobsAddon.addons.mechanics.OnRealBlockBreakMechanic;
 import cn.clexus.mythicMobsAddon.addons.mechanics.SetPoseMechanic;
 import cn.clexus.mythicMobsAddon.addons.targeters.SourceOwner;
@@ -129,6 +126,8 @@ public class EventsListener implements Listener {
             event.register(new SitCondition(event.getConfig()));
         } else if (eq(name, "team")) {
             event.register(new TeamCondition(event.getConfig()));
+        } else if (eq(name,"input")) {
+            event.register(new InputCondition(event.getConfig()));
         }
     }
 
