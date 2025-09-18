@@ -1,0 +1,7 @@
+name: MythicMobsAddon
+version: ${version}
+main: cn.clexus.mythicMobsAddon.MythicMobsAddon
+api-version: '1.13'
+depend: [ MythicMobs ]
+softdepend:
+  - MythicCrucible
