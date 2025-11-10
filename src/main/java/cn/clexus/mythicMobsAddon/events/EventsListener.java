@@ -111,8 +111,6 @@ public class EventsListener implements Listener {
             event.register(new SetPoseMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "onrealblockbreak", "onrealbreakblock")) {
             event.register(new OnRealBlockBreakMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
-        } else if (eq(m, "readpdc")) {
-            event.register(new ReadPDCMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "savepdc")) {
             event.register(new SavePDCMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "removepdc")) {

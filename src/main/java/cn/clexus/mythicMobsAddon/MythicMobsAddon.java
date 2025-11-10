@@ -1,6 +1,8 @@
 package cn.clexus.mythicMobsAddon;
 
+import cn.clexus.mythicMobsAddon.addons.placeholders.CasterPDCPlaceholder;
 import cn.clexus.mythicMobsAddon.addons.placeholders.CasterRelativeLocationPlaceholder;
+import cn.clexus.mythicMobsAddon.addons.placeholders.TargetPDCPlaceholder;
 import cn.clexus.mythicMobsAddon.addons.triggers.OnBlockBreakTrigger;
 import cn.clexus.mythicMobsAddon.addons.triggers.OnKillTrigger;
 import cn.clexus.mythicMobsAddon.addons.triggers.OnPlayerInputTrigger;
@@ -21,7 +23,10 @@ public final class MythicMobsAddon extends JavaPlugin {
         if(CrucibleSupport.hasSupport()){
             Bukkit.getPluginManager().registerEvents(new CrucibleEventsListener(), this);
         }
-        MythicBukkit.inst().getPlaceholderManager().register("caster.relative", new CasterRelativeLocationPlaceholder());
+        MythicBukkit mythicBukkit = MythicBukkit.inst();
+        mythicBukkit.getPlaceholderManager().register("caster.relative", new CasterRelativeLocationPlaceholder());
+        mythicBukkit.getPlaceholderManager().register("caster.pdc", new CasterPDCPlaceholder());
+        mythicBukkit.getPlaceholderManager().register("target.pdc", new TargetPDCPlaceholder());
     }
 
     @Override
