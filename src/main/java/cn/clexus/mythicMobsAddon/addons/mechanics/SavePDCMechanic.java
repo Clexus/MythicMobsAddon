@@ -5,6 +5,7 @@ import io.lumine.mythic.api.config.MythicLineConfig;
 import io.lumine.mythic.api.skills.ITargetedEntitySkill;
 import io.lumine.mythic.api.skills.SkillMetadata;
 import io.lumine.mythic.api.skills.SkillResult;
+import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.core.logging.MythicLogger;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.SkillMechanic;
@@ -23,12 +24,12 @@ import java.util.Locale;
 public class SavePDCMechanic extends SkillMechanic implements ITargetedEntitySkill {
     private final String slot;
     private final NamespacedKey namespacedKey;
-    private final String data;
+    private final PlaceholderString data;
 
     public SavePDCMechanic(SkillExecutor manager, File file, String line, MythicLineConfig mlc) {
         super(manager, file, line, mlc);
         this.slot = mlc.getString(new String[] { "slot" , "s"}, "HAND");
-        this.data = mlc.getString(new String[] { "data" , "d"}, "DATA");
+        this.data = PlaceholderString.of(mlc.getString(new String[] { "data" , "d"}, "DATA"));
         String nk = mlc.getString(new String[] { "namespacedKey" , "n"}, "mmaddon:pdc");
         this.namespacedKey = NamespacedKey.fromString(nk);
         if(namespacedKey == null){
@@ -78,7 +79,7 @@ public class SavePDCMechanic extends SkillMechanic implements ITargetedEntitySki
         if(itemStack == null || itemStack.isEmpty()){
             return SkillResult.INVALID_TARGET;
         }
-        itemStack.editMeta(meta -> meta.getPersistentDataContainer().set(namespacedKey, PersistentDataType.STRING, this.data));
+        itemStack.editMeta(meta -> meta.getPersistentDataContainer().set(namespacedKey, PersistentDataType.STRING, this.data.get(skillMetadata, abstractEntity)));
         return SkillResult.SUCCESS;
     }
 }
