@@ -2,6 +2,8 @@ package cn.clexus.mythicMobsAddon.events;
 
 import cn.clexus.mythicMobsAddon.addons.conditions.*;
 import cn.clexus.mythicMobsAddon.addons.mechanics.OnRealBlockBreakMechanic;
+import cn.clexus.mythicMobsAddon.addons.mechanics.ReadPDCMechanic;
+import cn.clexus.mythicMobsAddon.addons.mechanics.SavePDCMechanic;
 import cn.clexus.mythicMobsAddon.addons.mechanics.SetPoseMechanic;
 import cn.clexus.mythicMobsAddon.addons.targeters.SourceOwner;
 import cn.clexus.mythicMobsAddon.addons.targeters.TeamTargeter;
@@ -112,6 +114,10 @@ public class EventsListener implements Listener {
             event.register(new SetPoseMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "onrealblockbreak", "onrealbreakblock")) {
             event.register(new OnRealBlockBreakMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "readpdc")) {
+            event.register(new ReadPDCMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "savepdc")) {
+            event.register(new SavePDCMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 

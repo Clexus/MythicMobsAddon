@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'cn.clexus'
-version = '1.10'
+version = '1.11'
 
 repositories {
     mavenCentral()
@@ -24,9 +24,8 @@ repositories {
 
 
 dependencies {
-    compileOnly 'io.lumine:Mythic-Dist:5.9.5'
+    compileOnly 'io.lumine:Mythic-Dist:5.10.1'
     compileOnly 'io.lumine:MythicCrucible-Dist:2.2.0-SNAPSHOT'
-    compileOnly("com.github.retrooper:packetevents-spigot:2.8.0")
     paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
 }
 

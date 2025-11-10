@@ -4,7 +4,6 @@ import cn.clexus.mythicMobsAddon.addons.triggers.OnBlockBreakTrigger;
 import cn.clexus.mythicMobsAddon.addons.triggers.OnPlayerInputTrigger;
 import io.lumine.mythic.api.adapters.AbstractLocation;
 import io.lumine.mythic.api.skills.SkillMetadata;
-import io.lumine.mythic.api.skills.SkillTrigger;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitPlayer;
@@ -21,11 +20,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInputEvent;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class CrucibleEventsListener implements Listener {
     MythicBukkit mythicBukkit = MythicBukkit.inst();
@@ -50,30 +46,6 @@ public class CrucibleEventsListener implements Listener {
         playerData.initialize(new BukkitPlayer(player));
         SkillMetadata data = eventExecutor.buildSkillMetadata(OnPlayerInputTrigger.onPlayerInput, meta, playerData, BukkitAdapter.adapt(player), BukkitAdapter.adapt(player.getLocation()), true);
         TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
-    }
-
-    public static Queue<SkillMechanic> getAllMechanics(Player player, SkillTrigger<?> trigger) {
-        Queue<SkillMechanic> mechanics = new LinkedList<>();
-
-        // 主手
-        manager.getItem(player.getInventory().getItemInMainHand())
-                .flatMap(item -> item.getSkills(trigger))
-                .ifPresent(mechanics::addAll);
-
-        // 副手
-        manager.getItem(player.getInventory().getItemInOffHand())
-                .flatMap(item -> item.getSkills(trigger))
-                .ifPresent(mechanics::addAll);
-
-        // 护甲
-        for (ItemStack armor : player.getInventory().getArmorContents()) {
-            if (armor == null) continue;
-            manager.getItem(armor)
-                    .flatMap(item -> item.getSkills(trigger))
-                    .ifPresent(mechanics::addAll);
-        }
-
-        return mechanics;
     }
 
 
