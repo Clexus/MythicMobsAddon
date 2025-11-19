@@ -115,6 +115,8 @@ public class EventsListener implements Listener {
             event.register(new SavePDCMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "removepdc")) {
             event.register(new RemovePDCMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m,"parabolic")) {
+            event.register(new ParabolicMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 
