@@ -4,6 +4,8 @@ import cn.clexus.mythicMobsAddon.addons.conditions.*;
 import cn.clexus.mythicMobsAddon.addons.mechanics.*;
 import cn.clexus.mythicMobsAddon.addons.targeters.SourceOwner;
 import cn.clexus.mythicMobsAddon.addons.targeters.TeamTargeter;
+import cn.clexus.mythicMobsAddon.addons.triggers.OnEntityEffectTickTrigger;
+import cn.clexus.mythicMobsAddon.addons.triggers.OnEntityPotionEffectTrigger;
 import cn.clexus.mythicMobsAddon.addons.triggers.OnKillTrigger;
 import cn.clexus.mythicMobsAddon.addons.triggers.OnRegainHealthTrigger;
 import io.lumine.mythic.api.config.MythicConfig;
@@ -12,14 +14,17 @@ import io.lumine.mythic.api.skills.SkillMetadata;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.adapters.BukkitEntity;
+import io.lumine.mythic.bukkit.adapters.BukkitPlayer;
 import io.lumine.mythic.bukkit.events.MythicConditionLoadEvent;
 import io.lumine.mythic.bukkit.events.MythicMechanicLoadEvent;
 import io.lumine.mythic.bukkit.events.MythicMobSpawnEvent;
 import io.lumine.mythic.bukkit.events.MythicTargeterLoadEvent;
 import io.lumine.mythic.core.mobs.ActiveMob;
 import io.lumine.mythic.core.mobs.MobExecutor;
+import io.lumine.mythic.core.players.PlayerData;
 import io.lumine.mythic.core.skills.EventExecutor;
 import io.lumine.mythic.core.skills.TriggeredSkill;
+import io.papermc.paper.event.entity.EntityEffectTickEvent;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.attribute.Attributable;
@@ -27,9 +32,11 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
@@ -58,6 +65,52 @@ public class EventsListener implements Listener {
         if (mobManager.isMythicMob(entity)) {
             OnRegainHealthTrigger.EntityRegainHealthMeta meta = new OnRegainHealthTrigger.EntityRegainHealthMeta(event);
             SkillMetadata data = eventExecutor.buildSkillMetadata(OnRegainHealthTrigger.onRegainHealth, meta, mobManager.getMythicMobInstance(entity), BukkitAdapter.adapt(entity), BukkitAdapter.adapt(entity.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityPotionEffect(EntityPotionEffectEvent event) {
+        Entity entity = event.getEntity();
+        OnEntityPotionEffectTrigger.EntityPotionEffectMeta meta = new OnEntityPotionEffectTrigger.EntityPotionEffectMeta(event);
+        if (mobManager.isMythicMob(entity)) {
+            ActiveMob am = mobManager.getMythicMobInstance(entity);
+            if (am == null) return;
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnEntityPotionEffectTrigger.onPotionEffect, meta, am, BukkitAdapter.adapt(entity), BukkitAdapter.adapt(entity.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+            }
+        } else if (entity instanceof Player player) {
+            PlayerData playerData = new PlayerData(player.getUniqueId(), player.getName());
+            playerData.initialize(new BukkitPlayer(player));
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnEntityPotionEffectTrigger.onPotionEffect, meta, playerData, BukkitAdapter.adapt(player), BukkitAdapter.adapt(player.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityTickEffect(EntityEffectTickEvent event) {
+        Entity entity = event.getEntity();
+        OnEntityEffectTickTrigger.EntityEffectTickMeta meta = new OnEntityEffectTickTrigger.EntityEffectTickMeta(event);
+        if (mobManager.isMythicMob(entity)) {
+            ActiveMob am = mobManager.getMythicMobInstance(entity);
+            if (am == null) return;
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnEntityEffectTickTrigger.onEffectTick, meta, am, BukkitAdapter.adapt(entity), BukkitAdapter.adapt(entity.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+            }
+        } else if (entity instanceof Player player) {
+            PlayerData playerData = new PlayerData(player.getUniqueId(), player.getName());
+            playerData.initialize(new BukkitPlayer(player));
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnEntityEffectTickTrigger.onEffectTick, meta, playerData, BukkitAdapter.adapt(player), BukkitAdapter.adapt(player.getLocation()), true);
             TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
             if (ts.getCancelled()) {
                 event.setCancelled(true);

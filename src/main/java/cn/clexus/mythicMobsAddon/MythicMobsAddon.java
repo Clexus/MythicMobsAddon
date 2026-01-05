@@ -3,10 +3,7 @@ package cn.clexus.mythicMobsAddon;
 import cn.clexus.mythicMobsAddon.addons.placeholders.CasterPDCPlaceholder;
 import cn.clexus.mythicMobsAddon.addons.placeholders.CasterRelativeLocationPlaceholder;
 import cn.clexus.mythicMobsAddon.addons.placeholders.TargetPDCPlaceholder;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnBlockBreakTrigger;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnKillTrigger;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnPlayerInputTrigger;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnRegainHealthTrigger;
+import cn.clexus.mythicMobsAddon.addons.triggers.*;
 import cn.clexus.mythicMobsAddon.events.CrucibleEventsListener;
 import cn.clexus.mythicMobsAddon.events.EventsListener;
 import cn.clexus.mythicMobsAddon.support.CrucibleSupport;
@@ -35,5 +32,7 @@ public final class MythicMobsAddon extends JavaPlugin {
         OnBlockBreakTrigger.register();
         OnRegainHealthTrigger.register();
         OnPlayerInputTrigger.register();
+        OnEntityPotionEffectTrigger.register();
+        OnEntityEffectTickTrigger.register();
     }
 }

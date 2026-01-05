@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'cn.clexus'
-version = '1.16'
+version = '1.18'
 
 repositories {
     mavenCentral()
@@ -26,7 +26,7 @@ repositories {
 dependencies {
     compileOnly 'io.lumine:Mythic-Dist:5.10.1'
     compileOnly 'io.lumine:MythicCrucible-Dist:2.2.0-SNAPSHOT'
-    paperweight.paperDevBundle("1.21.8-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
 def targetJavaVersion = 21
