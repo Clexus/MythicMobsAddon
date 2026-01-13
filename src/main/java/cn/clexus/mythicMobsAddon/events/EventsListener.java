@@ -4,10 +4,7 @@ import cn.clexus.mythicMobsAddon.addons.conditions.*;
 import cn.clexus.mythicMobsAddon.addons.mechanics.*;
 import cn.clexus.mythicMobsAddon.addons.targeters.SourceOwner;
 import cn.clexus.mythicMobsAddon.addons.targeters.TeamTargeter;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnEntityEffectTickTrigger;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnEntityPotionEffectTrigger;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnKillTrigger;
-import cn.clexus.mythicMobsAddon.addons.triggers.OnRegainHealthTrigger;
+import cn.clexus.mythicMobsAddon.addons.triggers.*;
 import io.lumine.mythic.api.config.MythicConfig;
 import io.lumine.mythic.api.mobs.MythicMob;
 import io.lumine.mythic.api.skills.SkillMetadata;
@@ -38,6 +35,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import java.util.Collection;
@@ -93,6 +91,18 @@ public class EventsListener implements Listener {
                 event.setCancelled(true);
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerInput(PlayerInputEvent event) {
+        Player player = event.getPlayer();
+        if(player.getVehicle() == null) return;
+        Entity vehicle = player.getVehicle();
+        if (!mobManager.isMythicMob(vehicle)) return;
+        ActiveMob am = mobManager.getMythicMobInstance(vehicle);
+        OnPlayerInputTrigger.PlayerInputMeta meta = new OnPlayerInputTrigger.PlayerInputMeta(event);
+        SkillMetadata data = eventExecutor.buildSkillMetadata(OnPlayerInputTrigger.onPlayerInput, meta, am, BukkitAdapter.adapt(player), BukkitAdapter.adapt(player.getLocation()), true);
+        eventExecutor.processTriggerMechanics(data, meta);
     }
 
     @EventHandler
@@ -172,6 +182,8 @@ public class EventsListener implements Listener {
             event.register(new ParabolicMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "tempam","tempattributemodifier","tam")) {
             event.register(new TempAttributeModifierMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "settickslived", "stl")) {
+            event.register(new SetTicksLivedMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 
