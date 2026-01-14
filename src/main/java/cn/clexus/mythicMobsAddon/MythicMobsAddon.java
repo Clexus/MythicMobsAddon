@@ -24,6 +24,8 @@ public final class MythicMobsAddon extends JavaPlugin {
         mythicBukkit.getPlaceholderManager().register("caster.tickslived", new CasterTicksLivedPlaceholder());
         mythicBukkit.getPlaceholderManager().register("target.tickslived", new TargetTicksLivedPlaceholder());
         mythicBukkit.getPlaceholderManager().register("target.pdc", new TargetPDCPlaceholder());
+        mythicBukkit.getPlaceholderManager().register("target.eyeheight", new TargetEyeHeightPlaceholder());
+        mythicBukkit.getPlaceholderManager().register("caster.eyeheight", new CasterEyeHeightPlaceholder());
     }
 
     @Override
