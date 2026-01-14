@@ -184,6 +184,8 @@ public class EventsListener implements Listener {
             event.register(new TempAttributeModifierMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "settickslived", "stl")) {
             event.register(new SetTicksLivedMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "funnel")) {
+            event.register(new FunnelMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 
