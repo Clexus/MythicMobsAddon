@@ -185,7 +185,8 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             if (target == null && newTarget != null) {
                 target = newTarget;
             }
-            if (target != null && MythicBukkit.inst().getAPIHelper().isMythicMob(target)) {
+
+            if (target != null) {
                 skillMetadata.setEntityTarget(BukkitAdapter.adapt(target));
             }
 
