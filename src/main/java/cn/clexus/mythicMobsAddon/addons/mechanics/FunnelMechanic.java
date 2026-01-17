@@ -186,6 +186,10 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 target = newTarget;
             }
 
+            if(target == null){
+                keepLocation = null;
+            }
+
             if (target != null) {
                 skillMetadata.setEntityTarget(BukkitAdapter.adapt(target));
             }
@@ -212,11 +216,34 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 var mtt = moveToTarget.get(skillMetadata, absOwner);
                 boolean keepLoc = keepLocationAfterMoving.get(skillMetadata, absOwner);
 
-                if(keepLocation == null){
-                    keepLocation = target.getEyeLocation();
+                if (keepLoc) {
+                    if (keepLocation == null) {
+                        double distance = distanceFromTarget.get(skillMetadata, absOwner);
+
+                        Location targetLoc = target.getEyeLocation();
+                        Vector dir = targetLoc.toVector().subtract(nowLoc.toVector());
+
+                        if (dir.lengthSquared() > 0) {
+                            dir.normalize();
+                        }
+
+                        keepLocation = targetLoc.clone().subtract(dir.multiply(distance));
+                    }
+
+                    Location fixed = keepLocation.clone();
+
+                    Vector look = target.getEyeLocation().toVector().subtract(fixed.toVector());
+                    if (look.lengthSquared() > 0) {
+                        fixed.setDirection(look);
+                    }
+
+                    display.teleport(fixed);
+                    return;
                 }
 
-                Location tLoc = keepLoc ? keepLocation : target.getEyeLocation();
+
+
+                Location tLoc = target.getEyeLocation();
 
                 Vector lookDir = tLoc.toVector().subtract(nowLoc.toVector());
                 if (lookDir.lengthSquared() == 0) {

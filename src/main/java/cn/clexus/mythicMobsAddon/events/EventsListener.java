@@ -213,6 +213,8 @@ public class EventsListener implements Listener {
             event.register(new TeamCondition(event.getConfig()));
         } else if (eq(name,"input")) {
             event.register(new InputCondition(event.getConfig()));
+        } else if (eq(name, "origindistance", "od")) {
+            event.register(new OriginDistanceCondition(event.getConfig()));
         }
     }
 
