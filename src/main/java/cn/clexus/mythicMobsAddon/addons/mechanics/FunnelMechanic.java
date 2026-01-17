@@ -30,9 +30,13 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
     private final PlaceholderString itemId;
     private final PlaceholderBoolean fixTarget;
     private final PlaceholderDouble discardRadius;
+    private final PlaceholderDouble distanceFromTarget;
     private final PlaceholderInt onActiveCooldown;
     private final PlaceholderInt offActiveCooldown;
     private final PlaceholderBoolean moveToTarget;
+    private final PlaceholderBoolean targetPlayers;
+    private final PlaceholderBoolean targetNonMythics;
+    private final PlaceholderBoolean keepLocationAfterMoving;
 
     public FunnelMechanic(SkillExecutor manager, File file, String line, MythicLineConfig mlc) {
         super(manager, file, line, mlc);
@@ -40,9 +44,13 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
         this.offActiveTickSkillName = mlc.getString(new String[]{"offactivetickskill", "offactivetick", "fat"});
         this.searchRadius = PlaceholderDouble.of(mlc.getString(new String[]{"searchradius", "sr"}, "15"));
         this.fixTarget = PlaceholderBoolean.of(mlc.getString(new String[]{"fixtarget", "ft"}, "true"));
+        this.targetPlayers = PlaceholderBoolean.of(mlc.getString(new String[]{"targetplayers", "targetplayer", "tp"}, "false"));
+        this.targetNonMythics = PlaceholderBoolean.of(mlc.getString(new String[]{"targetnonmythics", "tnm"}, "false"));
+        this.keepLocationAfterMoving = PlaceholderBoolean.of(mlc.getString(new String[]{"keeplocationaftermoving", "klam"}, "false"));
         this.itemString = PlaceholderString.of(mlc.getString(new String[]{"itemstring", "is"}, "stone"));
         this.itemId = PlaceholderString.of(mlc.getString(new String[]{"itemId", "id"}, "stone"));
         this.discardRadius = PlaceholderDouble.of(mlc.getString(new String[]{"discardradius", "dr"}, "15"));
+        this.distanceFromTarget = PlaceholderDouble.of(mlc.getString(new String[]{"distancefromtarget", "dft"}, "5"));
         this.moveToTarget = PlaceholderBoolean.of(mlc.getString(new String[]{"movetotarget", "mtt"}, "true"));
         this.onActiveCooldown = PlaceholderInt.of(mlc.getString(new String[]{"onactivecooldown", "oac"}, "0"));
         this.offActiveCooldown = PlaceholderInt.of(mlc.getString(new String[]{"offactivecooldown", "fac"}, "0"));
@@ -79,6 +87,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
         private int cooldownF = 0;
         private final int activeCooldown;
         private final int offCooldown;
+        private Location keepLocation = null;
 
         public FunnelTracker(SkillMetadata data, LivingEntity owner) {
             super(data);
@@ -139,14 +148,16 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 if (!p.isOnline()) return;
             }
 
-            double radius = searchRadius.get(skillMetadata, BukkitAdapter.adapt(owner));
+            AbstractEntity absOwner = BukkitAdapter.adapt(owner);
+            double radius = searchRadius.get(skillMetadata, absOwner);
             LivingEntity newTarget;
             LivingEntity temp = null;
             Location ownerLoc = owner.getLocation();
 
             for (Entity e : owner.getNearbyEntities(radius, radius, radius)) {
-                if (!(e instanceof LivingEntity living)) continue;
-                if (!MythicBukkit.inst().getAPIHelper().isMythicMob(e)) continue;
+                if (!(e instanceof LivingEntity living) || e instanceof ArmorStand) continue;
+                if (!targetNonMythics.get(skillMetadata, absOwner) && !MythicBukkit.inst().getAPIHelper().isMythicMob(e)) continue;
+                if (living instanceof Player && !targetPlayers.get(skillMetadata, absOwner)) continue;
 
                 if (temp == null ||
                         living.getLocation().distanceSquared(ownerLoc)
@@ -157,13 +168,13 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             }
 
             newTarget = temp;
-            if (!fixTarget.get(skillMetadata, BukkitAdapter.adapt(owner))) {
+            if (!fixTarget.get(skillMetadata, absOwner)) {
                 target = newTarget;
             }
             if (target != null && !target.isValid()) {
                 target = null;
             }
-            var dR = discardRadius.get(skillMetadata, BukkitAdapter.adapt(owner));
+            var dR = discardRadius.get(skillMetadata, absOwner);
             if (target != null && target.getLocation().distanceSquared(owner.getLocation()) > dR * dR) {
                 target = null;
             }
@@ -194,9 +205,14 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             Location nowLoc = display.getLocation();
 
             if (target != null) {
-                var mtt = moveToTarget.get(skillMetadata, BukkitAdapter.adapt(owner));
+                var mtt = moveToTarget.get(skillMetadata, absOwner);
+                boolean keepLoc = keepLocationAfterMoving.get(skillMetadata, absOwner);
 
-                Location tLoc = target.getEyeLocation();
+                if(keepLocation == null){
+                    keepLocation = target.getEyeLocation();
+                }
+
+                Location tLoc = keepLoc ? keepLocation : target.getEyeLocation();
 
                 Vector lookDir = tLoc.toVector().subtract(nowLoc.toVector());
                 if (lookDir.lengthSquared() == 0) {
@@ -205,13 +221,13 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 lookDir.normalize();
 
                 if (mtt) {
-                    double distance = 5.0;
+                    double distance = distanceFromTarget.get(skillMetadata, absOwner);
                     Location desired = tLoc.clone().subtract(lookDir.clone().multiply(distance));
 
                     Location mid = nowLoc.clone()
                             .add(desired.toVector().subtract(nowLoc.toVector()).multiply(0.2));
 
-                    mid.setDirection(tLoc.toVector().subtract(mid.toVector()).multiply(-1));
+                    mid.setDirection(tLoc.toVector().subtract(mid.toVector()));
                     display.teleport(mid);
 
                 } else {
@@ -219,7 +235,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                     Location mid = nowLoc.clone()
                             .add(idle.toVector().subtract(nowLoc.toVector()).multiply(0.2));
 
-                    mid.setDirection(tLoc.toVector().subtract(mid.toVector()).multiply(-1));
+                    mid.setDirection(tLoc.toVector().subtract(mid.toVector()));
                     display.teleport(mid);
                 }
 

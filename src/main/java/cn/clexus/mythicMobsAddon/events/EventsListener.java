@@ -53,6 +53,17 @@ public class EventsListener implements Listener {
                 TriggeredSkill ts = new TriggeredSkill(OnKillTrigger.onKill,
                         mobManager.getActiveMob(source.getUniqueId()).get(),
                         new BukkitEntity(event.getEntity()));
+                if (ts.getCancelled()) {
+                    event.setCancelled(true);
+                }
+            } else if (source instanceof Player player) {
+                PlayerData playerData = new PlayerData(player.getUniqueId(), player.getName());
+                playerData.initialize(new BukkitPlayer(player));
+                SkillMetadata data = eventExecutor.buildSkillMetadata(OnKillTrigger.onKill, playerData, BukkitAdapter.adapt(event.getEntity()), BukkitAdapter.adapt(player.getLocation()), true);
+                TriggeredSkill ts = eventExecutor.processTriggerMechanics(data);
+                if (ts.getCancelled()) {
+                    event.setCancelled(true);
+                }
             }
         }
     }
