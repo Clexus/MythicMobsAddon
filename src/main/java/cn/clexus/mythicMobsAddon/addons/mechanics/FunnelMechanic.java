@@ -35,6 +35,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
     private final PlaceholderInt offActiveCooldown;
     private final PlaceholderBoolean moveToTarget;
     private final PlaceholderBoolean targetPlayers;
+    private final PlaceholderBoolean targetOwner;
     private final PlaceholderBoolean targetNonMythics;
     private final PlaceholderBoolean keepLocationAfterMoving;
 
@@ -52,6 +53,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
         this.discardRadius = PlaceholderDouble.of(mlc.getString(new String[]{"discardradius", "dr"}, "15"));
         this.distanceFromTarget = PlaceholderDouble.of(mlc.getString(new String[]{"distancefromtarget", "dft"}, "5"));
         this.moveToTarget = PlaceholderBoolean.of(mlc.getString(new String[]{"movetotarget", "mtt"}, "true"));
+        this.targetOwner = PlaceholderBoolean.of(mlc.getString(new String[]{"targetowner", "to"}, "false"));
         this.onActiveCooldown = PlaceholderInt.of(mlc.getString(new String[]{"onactivecooldown", "oac"}, "0"));
         this.offActiveCooldown = PlaceholderInt.of(mlc.getString(new String[]{"offactivecooldown", "fac"}, "0"));
         this.threadSafetyLevel = ThreadSafetyLevel.SYNC_ONLY;
@@ -156,6 +158,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
 
             for (Entity e : owner.getNearbyEntities(radius, radius, radius)) {
                 if (!(e instanceof LivingEntity living) || e instanceof ArmorStand) continue;
+                if(e.equals(owner) && !targetOwner.get(skillMetadata, absOwner)) continue;
                 if (!targetNonMythics.get(skillMetadata, absOwner) && !MythicBukkit.inst().getAPIHelper().isMythicMob(e)) continue;
                 if (living instanceof Player && !targetPlayers.get(skillMetadata, absOwner)) continue;
 
