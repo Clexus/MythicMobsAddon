@@ -1,5 +1,6 @@
 package cn.clexus.mythicMobsAddon.addons.mechanics;
 
+import com.destroystokyo.paper.MaterialTags;
 import io.lumine.mythic.api.adapters.AbstractEntity;
 import io.lumine.mythic.api.config.MythicLineConfig;
 import io.lumine.mythic.api.skills.*;
@@ -9,6 +10,7 @@ import io.lumine.mythic.api.skills.placeholders.PlaceholderInt;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
+import io.lumine.mythic.core.skills.SkillCondition;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.auras.Aura;
 import org.bukkit.Bukkit;
@@ -18,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
@@ -38,6 +41,8 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
     private final PlaceholderBoolean targetOwner;
     private final PlaceholderBoolean targetNonMythics;
     private final PlaceholderBoolean keepLocationAfterMoving;
+    private List<SkillCondition> targetConditions;
+    private List<SkillCondition> casterConditions;
 
     public FunnelMechanic(SkillExecutor manager, File file, String line, MythicLineConfig mlc) {
         super(manager, file, line, mlc);
@@ -56,6 +61,14 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
         this.targetOwner = PlaceholderBoolean.of(mlc.getString(new String[]{"targetowner", "to"}, "false"));
         this.onActiveCooldown = PlaceholderInt.of(mlc.getString(new String[]{"onactivecooldown", "oac"}, "0"));
         this.offActiveCooldown = PlaceholderInt.of(mlc.getString(new String[]{"offactivecooldown", "fac"}, "0"));
+        String targetConStr = mlc.getString(new String[]{"targetconditions", "targetcondition", "targetcond", "targetcon", "tc"});
+        String casterConStr = mlc.getString(new String[]{"conditions", "condition", "cond", "con", "c"});
+        if (targetConStr != null) {
+            this.targetConditions = this.getPlugin().getSkillManager().getConditions(targetConStr);
+        }
+        if (casterConStr != null) {
+            this.casterConditions = this.getPlugin().getSkillManager().getConditions(casterConStr);
+        }
         this.threadSafetyLevel = ThreadSafetyLevel.SYNC_ONLY;
         this.forceSync = true;
         this.getManager().queueSecondPass(() -> {
@@ -152,15 +165,28 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
 
             AbstractEntity absOwner = BukkitAdapter.adapt(owner);
             double radius = searchRadius.get(skillMetadata, absOwner);
-            LivingEntity newTarget;
             LivingEntity temp = null;
             Location ownerLoc = owner.getLocation();
 
-            for (Entity e : owner.getNearbyEntities(radius, radius, radius)) {
+            out: for (Entity e : owner.getNearbyEntities(radius, radius, radius)) {
                 if (!(e instanceof LivingEntity living) || e instanceof ArmorStand) continue;
                 if(e.equals(owner) && !targetOwner.get(skillMetadata, absOwner)) continue;
                 if (!targetNonMythics.get(skillMetadata, absOwner) && !MythicBukkit.inst().getAPIHelper().isMythicMob(e)) continue;
                 if (living instanceof Player && !targetPlayers.get(skillMetadata, absOwner)) continue;
+                if (targetConditions != null && !targetConditions.isEmpty()) {
+                    for(SkillCondition condition : targetConditions) {
+                        if (!condition.evaluateToEntity(skillMetadata, BukkitAdapter.adapt(living))) {
+                            continue out;
+                        }
+                    }
+                }
+                if (casterConditions != null && !casterConditions.isEmpty()) {
+                    for(SkillCondition condition : casterConditions) {
+                        if (!condition.evaluateToEntity(skillMetadata, BukkitAdapter.adapt(owner))) {
+                            continue out;
+                        }
+                    }
+                }
 
                 if (temp == null ||
                         living.getLocation().distanceSquared(ownerLoc)
@@ -170,29 +196,56 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 }
             }
 
-            newTarget = temp;
+            LivingEntity candidate = temp;
+            LivingEntity finalTarget = target;
+
+            // 如果不锁定目标，优先使用新目标
             if (!fixTarget.get(skillMetadata, absOwner)) {
-                target = newTarget;
-            }
-            if (target != null && !target.isValid()) {
-                target = null;
-            }
-            var dR = discardRadius.get(skillMetadata, absOwner);
-            if (target != null && target.getLocation().distanceSquared(owner.getLocation()) > dR * dR) {
-                target = null;
+                finalTarget = candidate;
             }
 
-            if (target == null && newTarget != null) {
-                target = newTarget;
+            // 校验目标合法性 & 距离
+            if (finalTarget != null) {
+                if (!finalTarget.isValid()) {
+                    finalTarget = null;
+                } else {
+                    double dR = discardRadius.get(skillMetadata, absOwner);
+                    if (finalTarget.getLocation().distanceSquared(owner.getLocation()) > dR * dR) {
+                        finalTarget = null;
+                    }
+                    if (targetConditions != null && !targetConditions.isEmpty()) {
+                        for(SkillCondition condition : targetConditions) {
+                            if (!condition.evaluateToEntity(skillMetadata, BukkitAdapter.adapt(candidate))) {
+                                finalTarget = null;
+                                break;
+                            }
+                        }
+                    }
+                    if (casterConditions != null && !casterConditions.isEmpty()) {
+                        for(SkillCondition condition : casterConditions) {
+                            if (!condition.evaluateToEntity(skillMetadata, BukkitAdapter.adapt(owner))) {
+                                finalTarget = null;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
-            if(target == null){
+            // 若当前目标被清掉，允许回退到新目标
+            if (finalTarget == null && candidate != null) {
+                finalTarget = candidate;
+            }
+
+            // 同步状态
+            target = finalTarget;
+
+            if (target == null) {
                 keepLocation = null;
-            }
-
-            if (target != null) {
+            } else {
                 skillMetadata.setEntityTarget(BukkitAdapter.adapt(target));
             }
+
 
             super.auraTick();
             if (offActiveTickSkill.isPresent() && (onActiveTickSkill.isEmpty() || target == null || !target.isValid())) {
@@ -236,6 +289,9 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                     if (look.lengthSquared() > 0) {
                         fixed.setDirection(look);
                     }
+                    if(MaterialTags.SKULLS.isTagged(display.getItemStack())){
+                        fixed.setDirection(fixed.getDirection().multiply(-1));
+                    }
 
                     display.teleport(fixed);
                     return;
@@ -259,6 +315,9 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                             .add(desired.toVector().subtract(nowLoc.toVector()).multiply(0.2));
 
                     mid.setDirection(tLoc.toVector().subtract(mid.toVector()));
+                    if(MaterialTags.SKULLS.isTagged(display.getItemStack())){
+                        mid.setDirection(mid.getDirection().multiply(-1));
+                    }
                     display.teleport(mid);
 
                 } else {
@@ -267,6 +326,9 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                             .add(idle.toVector().subtract(nowLoc.toVector()).multiply(0.2));
 
                     mid.setDirection(tLoc.toVector().subtract(mid.toVector()));
+                    if(MaterialTags.SKULLS.isTagged(display.getItemStack())){
+                        mid.setDirection(mid.getDirection().multiply(-1));
+                    }
                     display.teleport(mid);
                 }
 
@@ -276,6 +338,9 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                         .add(idle.toVector().subtract(nowLoc.toVector()).multiply(0.2));
 
                 mid.setDirection(owner.getLocation().getDirection().multiply(-1));
+                if(MaterialTags.SKULLS.isTagged(display.getItemStack())){
+                    mid.setDirection(mid.getDirection().multiply(-1));
+                }
                 display.teleport(mid);
             }
 
