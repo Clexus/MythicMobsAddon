@@ -24,8 +24,8 @@ repositories {
 
 
 dependencies {
-    compileOnly 'io.lumine:Mythic-Dist:5.10.1'
-    compileOnly 'io.lumine:MythicCrucible-Dist:2.2.0-SNAPSHOT'
+    compileOnly 'io.lumine:Mythic-Dist:5.11.1'
+    compileOnly 'io.lumine:MythicCrucible-Dist:2.4.0-SNAPSHOT'
     paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 

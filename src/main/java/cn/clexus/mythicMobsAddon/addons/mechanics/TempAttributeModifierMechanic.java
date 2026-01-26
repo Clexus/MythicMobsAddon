@@ -14,11 +14,15 @@ import io.lumine.mythic.bukkit.utils.Schedulers;
 import io.lumine.mythic.core.logging.MythicLogger;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.SkillMechanic;
+import io.papermc.paper.registry.keys.tags.DamageTypeTagKeys;
+import io.papermc.paper.registry.tag.TagKey;
+import net.kyori.adventure.key.Key;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,6 +34,7 @@ public class TempAttributeModifierMechanic extends SkillMechanic implements ITar
     private final PlaceholderString name;
     private final PlaceholderDouble amount;
     private final PlaceholderInt duration;
+    public static final TagKey<DamageType> bypass = DamageTypeTagKeys.create(Key.key("bypasses_cooldown"));
 
     public TempAttributeModifierMechanic(SkillExecutor manager, File file, String line, MythicLineConfig mlc) {
         super(manager, file, line, mlc);
