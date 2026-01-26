@@ -213,7 +213,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                     if (finalTarget.getLocation().distanceSquared(owner.getLocation()) > dR * dR) {
                         finalTarget = null;
                     }
-                    if (targetConditions != null && !targetConditions.isEmpty()) {
+                    if (targetConditions != null && !targetConditions.isEmpty() && candidate != null) {
                         for(SkillCondition condition : targetConditions) {
                             if (!condition.evaluateToEntity(skillMetadata, BukkitAdapter.adapt(candidate))) {
                                 finalTarget = null;
