@@ -28,6 +28,7 @@ import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,11 +40,14 @@ import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EventsListener implements Listener {
     MythicBukkit mythicBukkit = MythicBukkit.inst();
     MobExecutor mobManager = mythicBukkit.getMobManager();
     EventExecutor eventExecutor = mythicBukkit.getSkillManager().getEventBus();
+    public static final Map<DamageSource, Double> trueDmg = new HashMap<>();
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
@@ -195,6 +199,8 @@ public class EventsListener implements Listener {
             event.register(new SetTicksLivedMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "funnel")) {
             event.register(new FunnelMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "truedamage", "truedmg", "td")) {
+            event.register(new TrueDamageMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 
@@ -213,6 +219,10 @@ public class EventsListener implements Listener {
             event.register(new InputCondition(event.getConfig()));
         } else if (eq(name, "origindistance", "od")) {
             event.register(new OriginDistanceCondition(event.getConfig()));
+        } else if (eq(name, "sblocktype", "sinblock")) {
+            event.register(new SimpleBlockTypeCondition(event.getConfig(), 0));
+        } else if (eq(name, "sonblock")) {
+            event.register(new SimpleBlockTypeCondition(event.getConfig(), 0.6));
         }
     }
 
@@ -226,7 +236,7 @@ public class EventsListener implements Listener {
         }
     }
 
-    private boolean eq(String a, String... strings) {
+    public static boolean eq(String a, String... strings) {
         for (String s : strings) {
             if (a.equalsIgnoreCase(s)) {
                 return true;
