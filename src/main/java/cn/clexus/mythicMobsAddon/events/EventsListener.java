@@ -53,7 +53,7 @@ public class EventsListener implements Listener {
     public void onEntityDeath(EntityDeathEvent event) {
         Entity source = event.getDamageSource().getCausingEntity() == null ? event.getDamageSource().getDirectEntity() : event.getDamageSource().getCausingEntity();
         if (source != null) {
-            if (mobManager.isMythicMob(source)) {
+            if (mobManager.isMythicMob(source) && mobManager.getActiveMob(source.getUniqueId()).isPresent()) {
                 TriggeredSkill ts = new TriggeredSkill(OnKillTrigger.onKill,
                         mobManager.getActiveMob(source.getUniqueId()).get(),
                         new BukkitEntity(event.getEntity()));
@@ -201,6 +201,10 @@ public class EventsListener implements Listener {
             event.register(new FunnelMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "truedamage", "truedmg", "td")) {
             event.register(new TrueDamageMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "hook")) {
+            event.register(new HookMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m,"ontruedamaged", "ontruedamage")) {
+            event.register(new OnTrueDamagedMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 
