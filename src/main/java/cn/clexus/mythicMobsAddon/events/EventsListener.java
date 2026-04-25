@@ -2,9 +2,14 @@ package cn.clexus.mythicMobsAddon.events;
 
 import cn.clexus.mythicMobsAddon.addons.conditions.*;
 import cn.clexus.mythicMobsAddon.addons.mechanics.*;
+import cn.clexus.mythicMobsAddon.addons.targeters.RandomLocationsOfBoundingBoxTargeter;
+import cn.clexus.mythicMobsAddon.addons.targeters.RandomLocationsOfTargetsBoundingBoxTargeter;
 import cn.clexus.mythicMobsAddon.addons.targeters.SourceOwner;
 import cn.clexus.mythicMobsAddon.addons.targeters.TeamTargeter;
 import cn.clexus.mythicMobsAddon.addons.triggers.*;
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import com.destroystokyo.paper.event.entity.WitchConsumePotionEvent;
+import com.destroystokyo.paper.event.entity.WitchThrowPotionEvent;
 import io.lumine.mythic.api.config.MythicConfig;
 import io.lumine.mythic.api.mobs.MythicMob;
 import io.lumine.mythic.api.skills.SkillMetadata;
@@ -32,7 +37,9 @@ import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
@@ -42,12 +49,22 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class EventsListener implements Listener {
     MythicBukkit mythicBukkit = MythicBukkit.inst();
     MobExecutor mobManager = mythicBukkit.getMobManager();
     EventExecutor eventExecutor = mythicBukkit.getSkillManager().getEventBus();
     public static final Map<DamageSource, Double> trueDmg = new HashMap<>();
+    private final Map<UUID, Long> damageIntervalUntil = new HashMap<>();
+    private final Map<UUID, Long> trueDamageIntervalUntil = new HashMap<>();
+
+    @EventHandler
+    public void onEntityRemove(EntityRemoveFromWorldEvent event){
+        UUID entityId = event.getEntity().getUniqueId();
+        damageIntervalUntil.remove(entityId);
+        trueDamageIntervalUntil.remove(entityId);
+    }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
@@ -70,6 +87,42 @@ public class EventsListener implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (event.getDamage() <= 0) return;
+
+        Entity entity = event.getEntity();
+        if (!mobManager.isMythicMob(entity)) return;
+
+        ActiveMob am = mobManager.getMythicMobInstance(entity);
+        if (am == null) return;
+
+        MythicConfig options = am.getType().getConfig().getNestedConfig("Options");
+        long interval = getIntervalTicks(options, "DamageInterval");
+        if (interval <= 0) return;
+
+        if (isIntervalActive(damageIntervalUntil, entity.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onEntityDamageMonitor(EntityDamageEvent event) {
+        if (event.getFinalDamage() <= 0) return;
+
+        Entity entity = event.getEntity();
+        if (!mobManager.isMythicMob(entity)) return;
+
+        ActiveMob am = mobManager.getMythicMobInstance(entity);
+        if (am == null) return;
+
+        MythicConfig options = am.getType().getConfig().getNestedConfig("Options");
+        long interval = getIntervalTicks(options, "DamageInterval");
+        if (interval <= 0) return;
+
+        startInterval(damageIntervalUntil, entity.getUniqueId(), interval);
     }
 
     @EventHandler
@@ -144,6 +197,38 @@ public class EventsListener implements Listener {
     }
 
     @EventHandler
+    public void onWitchThrowPotion(WitchThrowPotionEvent event) {
+        Entity entity = event.getEntity();
+        if (!mobManager.isMythicMob(entity)) return;
+
+        ActiveMob am = mobManager.getMythicMobInstance(entity);
+        if (am == null) return;
+
+        OnWitchThrowPotionTrigger.WitchThrowPotionMeta meta = new OnWitchThrowPotionTrigger.WitchThrowPotionMeta(event);
+        SkillMetadata data = eventExecutor.buildSkillMetadata(OnWitchThrowPotionTrigger.onWitchThrowPotion, meta, am, BukkitAdapter.adapt(event.getTarget()), BukkitAdapter.adapt(event.getTarget().getLocation()), true);
+        TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+        if (ts.getCancelled()) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onWitchConsumePotion(WitchConsumePotionEvent event) {
+        Entity entity = event.getEntity();
+        if (!mobManager.isMythicMob(entity)) return;
+
+        ActiveMob am = mobManager.getMythicMobInstance(entity);
+        if (am == null) return;
+
+        OnWitchConsumePotionTrigger.WitchConsumePotionMeta meta = new OnWitchConsumePotionTrigger.WitchConsumePotionMeta(event);
+        SkillMetadata data = eventExecutor.buildSkillMetadata(OnWitchConsumePotionTrigger.onWitchConsumePotion, meta, am, BukkitAdapter.adapt(entity), BukkitAdapter.adapt(entity.getLocation()), true);
+        TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+        if (ts.getCancelled()) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onRightClick(PlayerInteractEntityEvent event) {
         Entity entity = event.getRightClicked();
         if (mobManager.isMythicMob(entity)) {
@@ -203,8 +288,20 @@ public class EventsListener implements Listener {
             event.register(new TrueDamageMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "hook")) {
             event.register(new HookMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "onkill")) {
+            event.register(new OnKillMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "onheal")) {
+            event.register(new OnHealMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "oneffecttick")) {
+            event.register(new OnEffectTickMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "oneffect")) {
+            event.register(new OnEffectMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m,"ontruedamaged", "ontruedamage")) {
             event.register(new OnTrueDamagedMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "removeattributemodifier", "removemodifier", "ram")) {
+            event.register(new RemoveAttributeModifierMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "lookat")) {
+            event.register(new LookAtMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         }
     }
 
@@ -237,7 +334,90 @@ public class EventsListener implements Listener {
             event.register(new TeamTargeter(event.getContainer().getManager(), event.getConfig()));
         } else if (eq(name, "sourceowner", "so")) {
             event.register(new SourceOwner(event.getContainer().getManager(), event.getConfig()));
+        } else if (eq(name, "randomlocationsofboundingbox","rlobb", "rlbb")) {
+            event.register(new RandomLocationsOfBoundingBoxTargeter(event.getContainer().getManager(), event.getConfig()));
+        } else if (eq(name, "randomlocationsoftargetsboundingbox", "rlotbb", "rltbb")) {
+            event.register(new RandomLocationsOfTargetsBoundingBoxTargeter(event.getContainer().getManager(), event.getConfig()));
         }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onEntityTrueDamageInterval(EntityTrueDamageEvent event) {
+        Entity entity = event.getEntity();
+        if (!mobManager.isMythicMob(entity)) return;
+
+        ActiveMob am = mobManager.getMythicMobInstance(entity);
+        if (am == null) return;
+
+        MythicConfig options = am.getType().getConfig().getNestedConfig("Options");
+        long interval = getIntervalTicks(options, "TrueDamageInterval");
+        if (interval <= 0) return;
+
+        if (isIntervalActive(trueDamageIntervalUntil, entity.getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onEntityTrueDamaged(EntityTrueDamageEvent event) {
+        if (event.getDamage() <= 0) return;
+
+        Entity entity = event.getEntity();
+        OnTrueDamagedTrigger.EntityTrueDamagedMeta meta = new OnTrueDamagedTrigger.EntityTrueDamagedMeta(event);
+        if (mobManager.isMythicMob(entity)) {
+            ActiveMob am = mobManager.getMythicMobInstance(entity);
+            if (am == null) return;
+            MythicConfig options = am.getType().getConfig().getNestedConfig("Options");
+            long interval = getIntervalTicks(options, "TrueDamageInterval");
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnTrueDamagedTrigger.onTrueDamaged, meta, am, BukkitAdapter.adapt(entity), BukkitAdapter.adapt(entity.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+                return;
+            }
+            if (interval > 0 && event.getDamage() > 0) {
+                startInterval(trueDamageIntervalUntil, entity.getUniqueId(), interval);
+            }
+        } else if (entity instanceof Player player) {
+            PlayerData playerData = new PlayerData(player.getUniqueId(), player.getName());
+            playerData.initialize(new BukkitPlayer(player));
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnTrueDamagedTrigger.onTrueDamaged, meta, playerData, BukkitAdapter.adapt(player), BukkitAdapter.adapt(player.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+            }
+            // 玩家不使用 MythicMob Options，因此不记录真实伤害间隔。
+        }
+    }
+
+    private boolean isIntervalActive(Map<UUID, Long> intervals, UUID entityId) {
+        Long until = intervals.get(entityId);
+        if (until == null) return false;
+
+        long now = System.currentTimeMillis();
+        if (until <= now) {
+            intervals.remove(entityId);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void startInterval(Map<UUID, Long> intervals, UUID entityId, long ticks) {
+        if (ticks <= 0) {
+            intervals.remove(entityId);
+            return;
+        }
+
+        intervals.put(entityId, System.currentTimeMillis() + (ticks * 50L));
+    }
+
+    private long getIntervalTicks(MythicConfig options, String key) {
+        if (options == null || !options.isSet(key)) {
+            return 0L;
+        }
+
+        return Math.max(0L, options.getInteger(key));
     }
 
     public static boolean eq(String a, String... strings) {

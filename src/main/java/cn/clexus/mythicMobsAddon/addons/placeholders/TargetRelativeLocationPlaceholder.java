@@ -3,21 +3,21 @@ package cn.clexus.mythicMobsAddon.addons.placeholders;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
-import io.lumine.mythic.core.skills.placeholders.types.GenericPlaceholder;
 import io.lumine.mythic.core.skills.placeholders.segments.types.ResolvedPlaceholderSegment;
+import io.lumine.mythic.core.skills.placeholders.types.GenericPlaceholder;
 import io.lumine.mythic.core.skills.placeholders.types.GenericPlaceholderTypes.StringPlaceholder;
 import io.lumine.mythic.core.utils.annotations.MythicPlaceholder;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
-@MythicPlaceholder(placeholder = "caster.relative", usedPlaceholderArguments = 2)
-public class CasterRelativeLocationPlaceholder extends GenericPlaceholder<String> implements StringPlaceholder {
+@MythicPlaceholder(placeholder = "target.relative", usedPlaceholderArguments = 2)
+public class TargetRelativeLocationPlaceholder extends GenericPlaceholder<String> implements StringPlaceholder {
 
     private final ResolvedPlaceholderSegment<PlaceholderString> axis;
     private final ResolvedPlaceholderSegment<PlaceholderString> values;
 
-    public CasterRelativeLocationPlaceholder(GenericPlaceholder.GenericPlaceholderArguments metaContext) {
+    public TargetRelativeLocationPlaceholder(GenericPlaceholder.GenericPlaceholderArguments metaContext) {
         super(metaContext);
         this.axis = getPlaceholderString(0);
         this.values = getPlaceholderString(1);
@@ -26,7 +26,7 @@ public class CasterRelativeLocationPlaceholder extends GenericPlaceholder<String
     @Nullable
     @Override
     public String applyWithMetaKeywords(PlaceholderContext placeholderContext) {
-        if (placeholderContext.meta() == null || placeholderContext.meta().getCaster() == null) {
+        if (placeholderContext.entity() == null) {
             return "0";
         }
 
@@ -38,6 +38,7 @@ public class CasterRelativeLocationPlaceholder extends GenericPlaceholder<String
         if (valuesValue == null) {
             valuesValue = "";
         }
+
         String[] split = valuesValue.split(",");
         if (split.length != 3) {
             return "0";
@@ -54,12 +55,12 @@ public class CasterRelativeLocationPlaceholder extends GenericPlaceholder<String
             return "0";
         }
 
-        Location casterLoc = BukkitAdapter.adapt(placeholderContext.meta().getCaster().getLocation());
-        Location result = r(casterLoc, rx, ry, rz);
+        Location targetLoc = BukkitAdapter.adapt(placeholderContext.entity().getLocation());
+        Location result = rotateRelative(targetLoc, rx, ry, rz);
         return switch (axisValue) {
-            case "ox" -> String.valueOf(result.getX() - casterLoc.getX());
-            case "oy" -> String.valueOf(result.getY() - casterLoc.getY());
-            case "oz" -> String.valueOf(result.getZ() - casterLoc.getZ());
+            case "ox" -> String.valueOf(result.getX() - targetLoc.getX());
+            case "oy" -> String.valueOf(result.getY() - targetLoc.getY());
+            case "oz" -> String.valueOf(result.getZ() - targetLoc.getZ());
             case "ax" -> String.valueOf(result.getX());
             case "ay" -> String.valueOf(result.getY());
             case "az" -> String.valueOf(result.getZ());
@@ -67,7 +68,7 @@ public class CasterRelativeLocationPlaceholder extends GenericPlaceholder<String
         };
     }
 
-    private static Location r(Location origin, double rx, double ry, double rz) {
+    private static Location rotateRelative(Location origin, double rx, double ry, double rz) {
         Vector forward = origin.getDirection().normalize();
         Vector upWorld = new Vector(0, 1, 0);
         Vector right = forward.clone().crossProduct(upWorld).normalize();
@@ -75,11 +76,8 @@ public class CasterRelativeLocationPlaceholder extends GenericPlaceholder<String
             right = new Vector(1, 0, 0);
         }
         Vector up = right.clone().crossProduct(forward).normalize();
-
-        Vector offset = right.multiply(rx)
-                .add(up.multiply(ry))
-                .add(forward.multiply(rz));
-
+        Vector offset = right.multiply(rx).add(up.multiply(ry)).add(forward.multiply(rz));
         return origin.clone().add(offset);
     }
 }
+

@@ -10,6 +10,7 @@ import io.lumine.mythic.api.skills.placeholders.PlaceholderDouble;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.core.skills.SkillCondition;
+import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.auras.Aura;
 import io.lumine.mythic.core.skills.variables.VariableRegistry;
@@ -142,9 +143,14 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
             this.start();
         }
 
+        private PlaceholderContext casterContext() {
+            return PlaceholderContext.builder().meta(this.skillMetadata).entity(BukkitAdapter.adapt(caster)).build();
+        }
+
         @Override
         public void run() {
-            if (tickAfterHook.get(skillMetadata, BukkitAdapter.adapt(caster))) {
+            PlaceholderContext context = casterContext();
+            if (tickAfterHook.get(context)) {
                 if (isHooked) {
                     this.ticksRemaining -= this.interval;
                 }
@@ -174,7 +180,8 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                 this.auraStop();
                 return;
             }
-            double failRate = failChance.get(skillMetadata, BukkitAdapter.adapt(caster));
+            PlaceholderContext context = casterContext();
+            double failRate = failChance.get(context);
 
             if (!isHooked) {
                 extendChain();
@@ -189,7 +196,7 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                     return;
                 }
             }
-            if (tickAfterHook.get(skillMetadata, BukkitAdapter.adapt(caster))) {
+            if (tickAfterHook.get(context)) {
                 if (isHooked) {
                     this.execute(HookMechanic.this.onTickSkill, this.skillMetadata);
                 }
@@ -209,9 +216,10 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                     startDir = startLocation.getDirection().normalize();
                 }
             }
-            double speed = chainsPerTick.get(skillMetadata, BukkitAdapter.adapt(caster));
-            double maxDist = maxDistance.get(skillMetadata, BukkitAdapter.adapt(caster));
-            double hitBox = size.get(skillMetadata, BukkitAdapter.adapt(caster));
+            PlaceholderContext context = casterContext();
+            double speed = chainsPerTick.get(context);
+            double maxDist = maxDistance.get(context);
+            double hitBox = size.get(context);
             VariableRegistry vars = skillMetadata.getVariables();
 
             for (int i = 0; i < speed; i++) {
@@ -224,9 +232,9 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                 }
 
                 Location currentPos = startLocation.clone().add(startDir.clone().multiply(currentSearchDist));
-                double successRate = successChance.get(skillMetadata, BukkitAdapter.adapt(caster));
+                double successRate = successChance.get(context);
 
-                if (canHookBlock.get(skillMetadata, BukkitAdapter.adapt(caster))) {
+                if (canHookBlock.get(context)) {
                     var result = caster.getWorld().rayTraceBlocks(currentPos, startDir, 0.8, FluidCollisionMode.NEVER, true, e -> {
                         if (targetConditions != null) {
                             for (var cond : targetConditions) {
@@ -252,13 +260,13 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                 }
 
                 // 碰撞检测：实体
-                if (canHookEntity.get(skillMetadata, BukkitAdapter.adapt(caster))) {
+                if (canHookEntity.get(context)) {
                     var result = caster.getWorld().rayTraceEntities(currentPos, startDir, 0.8, hitBox, e -> {
                         if (e.equals(caster)
-                                || (livingOnly.get(skillMetadata, BukkitAdapter.adapt(caster)) && !(e instanceof LivingEntity))
-                                || (ignoreArmorstands.get(skillMetadata, BukkitAdapter.adapt(caster)) && e instanceof ArmorStand))
+                                || (livingOnly.get(context) && !(e instanceof LivingEntity))
+                                || (ignoreArmorstands.get(context) && e instanceof ArmorStand))
                             return false;
-                        if (!canHookPlayer.get(skillMetadata, BukkitAdapter.adapt(caster)) && e instanceof Player)
+                        if (!canHookPlayer.get(context) && e instanceof Player)
                             return false;
 
                         // 条件判定
@@ -297,7 +305,8 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
         }
 
         private void applyPullLogic() {
-            boolean reversePull = reverse.get(skillMetadata, BukkitAdapter.adapt(caster));
+            PlaceholderContext context = casterContext();
+            boolean reversePull = reverse.get(context);
             Location anchor;
             Entity subject;
             if (hookedBlockLoc != null) {
@@ -314,10 +323,10 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
             }
 
             double dist = subject.getLocation().distance(anchor);
-            double limit = pullLength.get(skillMetadata, BukkitAdapter.adapt(caster));
+            double limit = pullLength.get(context);
 
             if (dist > limit) {
-                double speedMult = pullSpeed.get(skillMetadata, BukkitAdapter.adapt(caster));
+                double speedMult = pullSpeed.get(context);
                 pull(subject, anchor, (dist - limit) * speedMult * 0.1);
             }
         }
@@ -353,7 +362,7 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
             display.setBlock(blockData);
             display.setTeleportDuration(1);
             display.setInterpolationDelay(1);
-            String hex = glowColor.get(skillMetadata, BukkitAdapter.adapt(caster));
+            String hex = glowColor.get(casterContext());
             if (!hex.equals("none")) {
                 display.setGlowColorOverride(Color.fromRGB(
                         Integer.valueOf(hex.substring(1, 3), 16),
@@ -387,7 +396,8 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
 
         @Override
         public void auraStop() {
-            boolean fie = failIsEnd.get(skillMetadata, BukkitAdapter.adapt(caster));
+            PlaceholderContext context = casterContext();
+            boolean fie = failIsEnd.get(context);
             var vars = skillMetadata.getVariables();
             if (!fie && vars.has("fail-cause")) {
                 links.forEach(Entity::remove);
@@ -396,12 +406,13 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                 HookTracker.this.ticksRemaining = 0;
                 return;
             }
-            if (pullOnEnd.get(skillMetadata, BukkitAdapter.adapt(caster)) && isHooked) {
+            if (pullOnEnd.get(context) && isHooked) {
                 long start = System.currentTimeMillis();
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        if (System.currentTimeMillis() - start >= timeout.get(skillMetadata, BukkitAdapter.adapt(caster)) * 50) {
+                        PlaceholderContext pullContext = HookTracker.this.casterContext();
+                        if (System.currentTimeMillis() - start >= timeout.get(pullContext) * 50) {
                             finish();
                             return;
                         }
@@ -416,7 +427,7 @@ public class HookMechanic extends Aura implements ITargetedEntitySkill, ITargete
                             }
                         } else if (hookedEntity != null && hookedEntity.isValid()) {
                             if (!caster.getBoundingBox().overlaps(hookedEntity.getBoundingBox())) {
-                                if (reverse.get(skillMetadata, BukkitAdapter.adapt(caster))) {
+                                if (reverse.get(pullContext)) {
                                     pull(caster, hookedEntity.getLocation(), 1);
                                 } else {
                                     pull(hookedEntity, caster.getLocation(), 1);

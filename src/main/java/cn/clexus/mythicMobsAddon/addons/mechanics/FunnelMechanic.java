@@ -11,6 +11,7 @@ import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.core.skills.SkillCondition;
+import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.auras.Aura;
 import org.bukkit.Bukkit;
@@ -109,9 +110,14 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             this.owner = owner;
             this.rightOffset = 2 * Math.random() - 1;
             this.upOffset = 2 * Math.random() - 1;
-            this.activeCooldown = onActiveCooldown.get(skillMetadata, BukkitAdapter.adapt(owner));
-            this.offCooldown = offActiveCooldown.get(skillMetadata, BukkitAdapter.adapt(owner));
+            PlaceholderContext context = ownerContext();
+            this.activeCooldown = onActiveCooldown.get(context);
+            this.offCooldown = offActiveCooldown.get(context);
             this.start();
+        }
+
+        private PlaceholderContext ownerContext() {
+            return PlaceholderContext.builder().meta(this.skillMetadata).entity(BukkitAdapter.adapt(owner)).build();
         }
 
         private Location getIdlePos() {
@@ -127,10 +133,11 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             Location spawn = getIdlePos();
             display = (ItemDisplay) owner.getWorld().spawnEntity(spawn, EntityType.ITEM_DISPLAY);
             ItemStack item;
+            PlaceholderContext context = ownerContext();
             try {
-                item = Bukkit.getItemFactory().createItemStack(itemString.get(skillMetadata, BukkitAdapter.adapt(owner)));
+                item = Bukkit.getItemFactory().createItemStack(itemString.get(context));
             } catch (Exception e) {
-                var id = itemId.get(skillMetadata, BukkitAdapter.adapt(owner));
+                var id = itemId.get(context);
                 item = MythicBukkit.inst().getItemManager().getItemStack(id);
                 if(item == null) {
                     throw new IllegalArgumentException("FunnelMechanic: Invalid itemId:" + id);
@@ -164,15 +171,16 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             }
 
             AbstractEntity absOwner = BukkitAdapter.adapt(owner);
-            double radius = searchRadius.get(skillMetadata, absOwner);
+            PlaceholderContext context = ownerContext();
+            double radius = searchRadius.get(context);
             LivingEntity temp = null;
             Location ownerLoc = owner.getLocation();
 
             out: for (Entity e : owner.getNearbyEntities(radius, radius, radius)) {
                 if (!(e instanceof LivingEntity living) || e instanceof ArmorStand) continue;
-                if(e.equals(owner) && !targetOwner.get(skillMetadata, absOwner)) continue;
-                if (!targetNonMythics.get(skillMetadata, absOwner) && !MythicBukkit.inst().getAPIHelper().isMythicMob(e)) continue;
-                if (living instanceof Player && !targetPlayers.get(skillMetadata, absOwner)) continue;
+                if(e.equals(owner) && !targetOwner.get(context)) continue;
+                if (!targetNonMythics.get(context) && !MythicBukkit.inst().getAPIHelper().isMythicMob(e)) continue;
+                if (living instanceof Player && !targetPlayers.get(context)) continue;
                 if (targetConditions != null && !targetConditions.isEmpty()) {
                     for(SkillCondition condition : targetConditions) {
                         if (!condition.evaluateToEntity(skillMetadata, BukkitAdapter.adapt(living))) {
@@ -200,7 +208,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             LivingEntity finalTarget = target;
 
             // 如果不锁定目标，优先使用新目标
-            if (!fixTarget.get(skillMetadata, absOwner)) {
+            if (!fixTarget.get(context)) {
                 finalTarget = candidate;
             }
 
@@ -209,7 +217,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 if (!finalTarget.isValid()) {
                     finalTarget = null;
                 } else {
-                    double dR = discardRadius.get(skillMetadata, absOwner);
+                    double dR = discardRadius.get(context);
                     if (finalTarget.getLocation().distanceSquared(owner.getLocation()) > dR * dR) {
                         finalTarget = null;
                     }
@@ -266,12 +274,12 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
             Location nowLoc = display.getLocation();
 
             if (target != null) {
-                var mtt = moveToTarget.get(skillMetadata, absOwner);
-                boolean keepLoc = keepLocationAfterMoving.get(skillMetadata, absOwner);
+                var mtt = moveToTarget.get(context);
+                boolean keepLoc = keepLocationAfterMoving.get(context);
 
                 if (keepLoc) {
                     if (keepLocation == null) {
-                        double distance = distanceFromTarget.get(skillMetadata, absOwner);
+                        double distance = distanceFromTarget.get(context);
 
                         Location targetLoc = target.getEyeLocation();
                         Vector dir = targetLoc.toVector().subtract(nowLoc.toVector());
@@ -308,7 +316,7 @@ public class FunnelMechanic extends Aura implements ITargetedEntitySkill {
                 lookDir.normalize();
 
                 if (mtt) {
-                    double distance = distanceFromTarget.get(skillMetadata, absOwner);
+                    double distance = distanceFromTarget.get(context);
                     Location desired = tLoc.clone().subtract(lookDir.clone().multiply(distance));
 
                     Location mid = nowLoc.clone()

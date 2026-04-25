@@ -1,0 +1,882 @@
+{
+    "ATTACK_DAMAGE": {
+        "names": [
+            "ATTACK_DAMAGE",
+            "attack-damage"
+        ],
+        "description": "基础攻击"
+    },
+    "ATTACK_SPEED": {
+        "names": [
+            "ATTACK_SPEED",
+            "attack-speed"
+        ],
+        "description": "攻击速度"
+    },
+    "CRITICAL_STRIKE_CHANCE": {
+        "names": [
+            "CRITICAL_STRIKE_CHANCE",
+            "critical-strike-chance"
+        ],
+        "description": "暴击概率"
+    },
+    "CRITICAL_STRIKE_POWER": {
+        "names": [
+            "CRITICAL_STRIKE_POWER",
+            "critical-strike-power"
+        ],
+        "description": "暴击附加"
+    },
+    "SKILL_CRITICAL_STRIKE_CHANCE": {
+        "names": [
+            "SKILL_CRITICAL_STRIKE_CHANCE",
+            "skill-critical-strike-chance"
+        ],
+        "description": "技能暴率"
+    },
+    "SKILL_CRITICAL_STRIKE_POWER": {
+        "names": [
+            "SKILL_CRITICAL_STRIKE_POWER",
+            "skill-critical-strike-power"
+        ],
+        "description": "技能爆伤"
+    },
+    "BLOCK_POWER": {
+        "names": [
+            "BLOCK_POWER",
+            "block-power"
+        ],
+        "description": "格挡免伤"
+    },
+    "BLOCK_RATING": {
+        "names": [
+            "BLOCK_RATING",
+            "block-rating"
+        ],
+        "description": "格挡几率"
+    },
+    "BLOCK_COOLDOWN_REDUCTION": {
+        "names": [
+            "BLOCK_COOLDOWN_REDUCTION",
+            "block-cooldown-reduction"
+        ],
+        "description": "阻挡冷缩"
+    },
+    "DODGE_RATING": {
+        "names": [
+            "DODGE_RATING",
+            "dodge-rating"
+        ],
+        "description": "闪避几率"
+    },
+    "DODGE_COOLDOWN_REDUCTION": {
+        "names": [
+            "DODGE_COOLDOWN_REDUCTION",
+            "dodge-cooldown-reduction"
+        ],
+        "description": "闪避冷缩"
+    },
+    "PARRY_RATING": {
+        "names": [
+            "PARRY_RATING",
+            "parry-rating"
+        ],
+        "description": "招架几率"
+    },
+    "PARRY_COOLDOWN_REDUCTION": {
+        "names": [
+            "PARRY_COOLDOWN_REDUCTION",
+            "parry-cooldown-reduction"
+        ],
+        "description": "招架冷缩"
+    },
+    "COOLDOWN_REDUCTION": {
+        "names": [
+            "COOLDOWN_REDUCTION",
+            "cooldown-reduction"
+        ],
+        "description": "冷却缩减"
+    },
+    "RANGE": {
+        "names": [
+            "RANGE",
+            "range"
+        ],
+        "description": "打击范围"
+    },
+    "ARROW_VELOCITY": {
+        "names": [
+            "ARROW_VELOCITY",
+            "arrow-velocity"
+        ],
+        "description": "箭矢速度"
+    },
+    "PVE_DAMAGE": {
+        "names": [
+            "PVE_DAMAGE",
+            "pve-damage"
+        ],
+        "description": "狩猎增伤"
+    },
+    "PVP_DAMAGE": {
+        "names": [
+            "PVP_DAMAGE",
+            "pvp-damage"
+        ],
+        "description": "竞技增伤"
+    },
+    "BLUNT_POWER": {
+        "names": [
+            "BLUNT_POWER",
+            "blunt-power"
+        ],
+        "description": "打击伤害半径"
+    },
+    "BLUNT_RATING": {
+        "names": [
+            "BLUNT_RATING",
+            "blunt-rating"
+        ],
+        "description": "打击伤害比例"
+    },
+    "WEAPON_DAMAGE": {
+        "names": [
+            "WEAPON_DAMAGE",
+            "weapon-damage"
+        ],
+        "description": "武器增伤"
+    },
+    "SKILL_DAMAGE": {
+        "names": [
+            "SKILL_DAMAGE",
+            "skill-damage"
+        ],
+        "description": "技能增伤"
+    },
+    "PROJECTILE_DAMAGE": {
+        "names": [
+            "PROJECTILE_DAMAGE",
+            "projectile-damage"
+        ],
+        "description": "弹射增伤"
+    },
+    "MAGIC_DAMAGE": {
+        "names": [
+            "MAGIC_DAMAGE",
+            "magic-damage"
+        ],
+        "description": "魔术增伤"
+    },
+    "PHYSICAL_DAMAGE": {
+        "names": [
+            "PHYSICAL_DAMAGE",
+            "physical-damage"
+        ],
+        "description": "物理增伤"
+    },
+    "DEFENSE": {
+        "names": [
+            "DEFENSE",
+            "defense"
+        ],
+        "description": "防御提升"
+    },
+    "DAMAGE_REDUCTION": {
+        "names": [
+            "DAMAGE_REDUCTION",
+            "damage-reduction"
+        ],
+        "description": "伤害减免"
+    },
+    "FALL_DAMAGE_REDUCTION": {
+        "names": [
+            "FALL_DAMAGE_REDUCTION",
+            "fall-damage-reduction"
+        ],
+        "description": "摔落减免"
+    },
+    "PROJECTILE_DAMAGE_REDUCTION": {
+        "names": [
+            "PROJECTILE_DAMAGE_REDUCTION",
+            "projectile-damage-reduction"
+        ],
+        "description": "弹射免伤"
+    },
+    "PHYSICAL_DAMAGE_REDUCTION": {
+        "names": [
+            "PHYSICAL_DAMAGE_REDUCTION",
+            "physical-damage-reduction"
+        ],
+        "description": "物理免伤"
+    },
+    "FIRE_DAMAGE_REDUCTION": {
+        "names": [
+            "FIRE_DAMAGE_REDUCTION",
+            "fire-damage-reduction"
+        ],
+        "description": "火焰减免"
+    },
+    "MAGIC_DAMAGE_REDUCTION": {
+        "names": [
+            "MAGIC_DAMAGE_REDUCTION",
+            "magic-damage-reduction"
+        ],
+        "description": "魔术免伤"
+    },
+    "PVE_DAMAGE_REDUCTION": {
+        "names": [
+            "PVE_DAMAGE_REDUCTION",
+            "pve-damage-reduction"
+        ],
+        "description": "狩猎减免"
+    },
+    "PVP_DAMAGE_REDUCTION": {
+        "names": [
+            "PVP_DAMAGE_REDUCTION",
+            "pvp-damage-reduction"
+        ],
+        "description": "竞技减免"
+    },
+    "UNDEAD_DAMAGE": {
+        "names": [
+            "UNDEAD_DAMAGE",
+            "undead-damage"
+        ],
+        "description": "除秽增伤"
+    },
+    "LIFESTEAL": {
+        "names": [
+            "LIFESTEAL",
+            "lifesteal"
+        ],
+        "description": "生命偷取"
+    },
+    "SPELL_VAMPIRISM": {
+        "names": [
+            "SPELL_VAMPIRISM",
+            "spell-vampirism"
+        ],
+        "description": "魔术吸血"
+    },
+    "ARMOR": {
+        "names": [
+            "ARMOR",
+            "armor"
+        ],
+        "description": "护甲提升"
+    },
+    "ARMOR_TOUGHNESS": {
+        "names": [
+            "ARMOR_TOUGHNESS",
+            "armor-toughness"
+        ],
+        "description": "护甲韧性"
+    },
+    "MAX_HEALTH": {
+        "names": [
+            "MAX_HEALTH",
+            "max-health"
+        ],
+        "description": "生命提升"
+    },
+    "MAX_MANA": {
+        "names": [
+            "MAX_MANA",
+            "max-mana"
+        ],
+        "description": "资源上限提升"
+    },
+    "KNOCKBACK_RESISTANCE": {
+        "names": [
+            "KNOCKBACK_RESISTANCE",
+            "knockback-resistance"
+        ],
+        "description": "击退抗性"
+    },
+    "MOVEMENT_SPEED": {
+        "names": [
+            "MOVEMENT_SPEED",
+            "movement-speed"
+        ],
+        "description": "移动速度"
+    },
+    "MAX_ABSORPTION": {
+        "names": [
+            "MAX_ABSORPTION",
+            "max-absorption"
+        ],
+        "description": "最大吸收值"
+    },
+    "BLOCK_BREAK_SPEED": {
+        "names": [
+            "BLOCK_BREAK_SPEED",
+            "block-break-speed"
+        ],
+        "description": "方块破坏速度"
+    },
+    "BLOCK_INTERACTION_RANGE": {
+        "names": [
+            "BLOCK_INTERACTION_RANGE",
+            "block-interaction-range"
+        ],
+        "description": "方块交互范围"
+    },
+    "ENTITY_INTERACTION_RANGE": {
+        "names": [
+            "ENTITY_INTERACTION_RANGE",
+            "entity-interaction-range"
+        ],
+        "description": "实体交互范围"
+    },
+    "FALL_DAMAGE_MULTIPLIER": {
+        "names": [
+            "FALL_DAMAGE_MULTIPLIER",
+            "fall-damage-multiplier"
+        ],
+        "description": "摔落伤害倍率"
+    },
+    "GRAVITY": {
+        "names": [
+            "GRAVITY",
+            "gravity"
+        ],
+        "description": "重力"
+    },
+    "JUMP_STRENGTH": {
+        "names": [
+            "JUMP_STRENGTH",
+            "jump-strength"
+        ],
+        "description": "跳跃强度"
+    },
+    "SAFE_FALL_DISTANCE": {
+        "names": [
+            "SAFE_FALL_DISTANCE",
+            "safe-fall-distance"
+        ],
+        "description": "安全跌落距离"
+    },
+    "SCALE": {
+        "names": [
+            "SCALE",
+            "scale"
+        ],
+        "description": "体型比例"
+    },
+    "STEP_HEIGHT": {
+        "names": [
+            "STEP_HEIGHT",
+            "step-height"
+        ],
+        "description": "跨越高度"
+    },
+    "BURNING_TIME": {
+        "names": [
+            "BURNING_TIME",
+            "burning-time"
+        ],
+        "description": "燃烧时间"
+    },
+    "EXPLOSION_KNOCKBACK_RESISTANCE": {
+        "names": [
+            "EXPLOSION_KNOCKBACK_RESISTANCE",
+            "explosion-knockback-resistance"
+        ],
+        "description": "爆炸击退抗性"
+    },
+    "MINING_EFFICIENCY": {
+        "names": [
+            "MINING_EFFICIENCY",
+            "mining-efficiency"
+        ],
+        "description": "采掘效率"
+    },
+    "MOVEMENT_EFFICIENCY": {
+        "names": [
+            "MOVEMENT_EFFICIENCY",
+            "movement-efficiency"
+        ],
+        "description": "移动效率"
+    },
+    "OXYGEN_BONUS": {
+        "names": [
+            "OXYGEN_BONUS",
+            "oxygen-bonus"
+        ],
+        "description": "氧气加成"
+    },
+    "SNEAKING_SPEED": {
+        "names": [
+            "SNEAKING_SPEED",
+            "sneaking-speed"
+        ],
+        "description": "潜行速度"
+    },
+    "SUBMERGED_MINING_SPEED": {
+        "names": [
+            "SUBMERGED_MINING_SPEED",
+            "submerged-mining-speed"
+        ],
+        "description": "水下采掘速度"
+    },
+    "SWEEPING_DAMAGE_RATIO": {
+        "names": [
+            "SWEEPING_DAMAGE_RATIO",
+            "sweeping-damage-ratio"
+        ],
+        "description": "横扫伤害比例"
+    },
+    "WATER_MOVEMENT_EFFICIENCY": {
+        "names": [
+            "WATER_MOVEMENT_EFFICIENCY",
+            "water-movement-efficiency"
+        ],
+        "description": "水下移动效率"
+    },
+    "KNOCKBACK": {
+        "names": [
+            "KNOCKBACK",
+            "knockback"
+        ],
+        "description": "击退效果"
+    },
+    "CUSTOM_MYLUCK": {
+        "names": [
+            "CUSTOM_MYLUCK",
+            "custom-myluck"
+        ],
+        "description": "异常抵抗"
+    },
+    "CUSTOM_STATEDURATION": {
+        "names": [
+            "CUSTOM_STATEDURATION",
+            "custom-state-duration"
+        ],
+        "description": "状态持续时间"
+    },
+    "CUSTOM_AMMO": {
+        "names": [
+            "CUSTOM_AMMO",
+            "custom-ammo"
+        ],
+        "description": "额外载弹"
+    },
+    "CUSTOM_SHOOTSPEED": {
+        "names": [
+            "CUSTOM_SHOOTSPEED",
+            "custom-shootspeed"
+        ],
+        "description": "连射速度"
+    },
+    "HEALTH_REGENERATION": {
+        "names": [
+            "HEALTH_REGENERATION",
+            "health-regeneration"
+        ],
+        "description": "生命恢复"
+    },
+    "MAX_HEALTH_REGENERATION": {
+        "names": [
+            "MAX_HEALTH_REGENERATION",
+            "max-health-regeneration"
+        ],
+        "description": "最大生命恢复"
+    },
+    "MANA_REGENERATION": {
+        "names": [
+            "MANA_REGENERATION",
+            "mana-regeneration"
+        ],
+        "description": "资源恢复"
+    },
+    "MAX_MANA_REGENERATION": {
+        "names": [
+            "MAX_MANA_REGENERATION",
+            "max-mana-regeneration"
+        ],
+        "description": "最大资源恢复"
+    },
+    "STAMINA_REGENERATION": {
+        "names": [
+            "STAMINA_REGENERATION",
+            "stamina-regeneration"
+        ],
+        "description": "体能恢复"
+    },
+    "MAX_STAMINA_REGENERATION": {
+        "names": [
+            "MAX_STAMINA_REGENERATION",
+            "max-stamina-regeneration"
+        ],
+        "description": "最大体能恢复"
+    },
+    "MAX_STAMINA": {
+        "names": [
+            "MAX_STAMINA",
+            "max-stamina"
+        ],
+        "description": "体能上限提升"
+    },
+    "MAX_STELLIUM": {
+        "names": [
+            "MAX_STELLIUM",
+            "max-stellium"
+        ],
+        "description": "最大星能"
+    },
+    "ADDITIONAL_EXPERIENCE": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE",
+            "additional-experience"
+        ],
+        "description": "经验加成"
+    },
+    "ADDITIONAL_STR": {
+        "names": [
+            "ADDITIONAL_STR",
+            "additional-str"
+        ],
+        "description": "额外力量"
+    },
+    "ADDITIONAL_VIT": {
+        "names": [
+            "ADDITIONAL_VIT",
+            "additional-vit"
+        ],
+        "description": "额外体质"
+    },
+    "ADDITIONAL_AGI": {
+        "names": [
+            "ADDITIONAL_AGI",
+            "additional-agi"
+        ],
+        "description": "额外敏捷"
+    },
+    "ADDITIONAL_LUK": {
+        "names": [
+            "ADDITIONAL_LUK",
+            "additional-luk"
+        ],
+        "description": "额外幸运"
+    },
+    "ADDITIONAL_DEX": {
+        "names": [
+            "ADDITIONAL_DEX",
+            "additional-dex"
+        ],
+        "description": "额外技巧"
+    },
+    "ADDITIONAL_INT": {
+        "names": [
+            "ADDITIONAL_INT",
+            "additional-int"
+        ],
+        "description": "额外信念"
+    },
+    "ADDITIONAL_EXPERIENCE_FARMING": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE_FARMING",
+            "additional-experience-farming"
+        ],
+        "description": "额外农艺经验"
+    },
+    "PROFESSION_FARMING": {
+        "names": [
+            "PROFESSION_FARMING",
+            "profession-farming"
+        ],
+        "description": "农艺师等级需求"
+    },
+    "ADDITIONAL_EXPERIENCE_FISHING": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE_FISHING",
+            "additional-experience-fishing"
+        ],
+        "description": "额外垂钓经验"
+    },
+    "PROFESSION_FISHING": {
+        "names": [
+            "PROFESSION_FISHING",
+            "profession-fishing"
+        ],
+        "description": "垂钓者等级需求"
+    },
+    "ADDITIONAL_EXPERIENCE_CASTING": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE_CASTING",
+            "additional-experience-casting"
+        ],
+        "description": "额外施法经验"
+    },
+    "PROFESSION_CASTING": {
+        "names": [
+            "PROFESSION_CASTING",
+            "profession-casting"
+        ],
+        "description": "施法等级需求"
+    },
+    "ADDITIONAL_EXPERIENCE_MINING": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE_MINING",
+            "additional-experience-mining"
+        ],
+        "description": "额外采掘经验"
+    },
+    "PROFESSION_MINING": {
+        "names": [
+            "PROFESSION_MINING",
+            "profession-mining"
+        ],
+        "description": "采掘者等级需求"
+    },
+    "ADDITIONAL_EXPERIENCE_USER": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE_USER",
+            "additional-experience-user"
+        ],
+        "description": "账号经验加成"
+    },
+    "PROFESSION_USER": {
+        "names": [
+            "PROFESSION_USER",
+            "profession-user"
+        ],
+        "description": "冒险等级需求"
+    },
+    "ADDITIONAL_EXPERIENCE_SMELTING": {
+        "names": [
+            "ADDITIONAL_EXPERIENCE_SMELTING",
+            "additional-experience-smelting"
+        ],
+        "description": "额外烹饪经验"
+    },
+    "PROFESSION_SMELTING": {
+        "names": [
+            "PROFESSION_SMELTING",
+            "profession-smelting"
+        ],
+        "description": "烹饪师等级需求"
+    },
+    "FACTION_DAMAGE_构体": {
+        "names": [
+            "FACTION_DAMAGE_构体"
+        ],
+        "description": "构体增伤"
+    },
+    "FACTION_DAMAGE_PILLAR": {
+        "names": [
+            "FACTION_DAMAGE_PILLAR"
+        ],
+        "description": "支柱增伤"
+    },
+    "FACTION_DAMAGE_CYBORGGM": {
+        "names": [
+            "FACTION_DAMAGE_CYBORGGM"
+        ],
+        "description": "半机械GM增伤"
+    },
+    "FACTION_DAMAGE_不死": {
+        "names": [
+            "FACTION_DAMAGE_不死"
+        ],
+        "description": "不死增伤"
+    },
+    "FACTION_DAMAGE_陷阱": {
+        "names": [
+            "FACTION_DAMAGE_陷阱"
+        ],
+        "description": "陷阱增伤"
+    },
+    "FACTION_DAMAGE_BANDIDOS": {
+        "names": [
+            "FACTION_DAMAGE_BANDIDOS"
+        ],
+        "description": "盗匪增伤"
+    },
+    "FACTION_DAMAGE_动物": {
+        "names": [
+            "FACTION_DAMAGE_动物"
+        ],
+        "description": "动物增伤"
+    },
+    "FACTION_DAMAGE_FALLENHERO": {
+        "names": [
+            "FACTION_DAMAGE_FALLENHERO"
+        ],
+        "description": "堕落英雄增伤"
+    },
+    "FACTION_DAMAGE_VOID SOULS": {
+        "names": [
+            "FACTION_DAMAGE_VOID SOULS"
+        ],
+        "description": "虚空灵魂增伤"
+    },
+    "FACTION_DAMAGE_SPACE": {
+        "names": [
+            "FACTION_DAMAGE_SPACE"
+        ],
+        "description": "空间增伤"
+    },
+    "FACTION_DAMAGE_SOLAR ELEMENTALS": {
+        "names": [
+            "FACTION_DAMAGE_SOLAR ELEMENTALS"
+        ],
+        "description": "烈阳元素增伤"
+    },
+    "FACTION_DAMAGE_SUMMON": {
+        "names": [
+            "FACTION_DAMAGE_SUMMON"
+        ],
+        "description": "召唤物增伤"
+    },
+    "FACTION_DAMAGE_SOUL": {
+        "names": [
+            "FACTION_DAMAGE_SOUL"
+        ],
+        "description": "灵魂增伤"
+    },
+    "FACTION_DAMAGE_SHADOW": {
+        "names": [
+            "FACTION_DAMAGE_SHADOW"
+        ],
+        "description": "暗影增伤"
+    },
+    "FACTION_DAMAGE_CREEPERS": {
+        "names": [
+            "FACTION_DAMAGE_CREEPERS"
+        ],
+        "description": "苦力怕增伤"
+    },
+    "FACTION_DAMAGE_ELITE": {
+        "names": [
+            "FACTION_DAMAGE_ELITE"
+        ],
+        "description": "精英增伤"
+    },
+    "FACTION_DAMAGE_队友": {
+        "names": [
+            "FACTION_DAMAGE_队友"
+        ],
+        "description": "队友伤害"
+    },
+    "FACTION_DAMAGE_DARKMAGE": {
+        "names": [
+            "FACTION_DAMAGE_DARKMAGE"
+        ],
+        "description": "暗黑法师增伤"
+    },
+    "FACTION_DAMAGE_人形": {
+        "names": [
+            "FACTION_DAMAGE_人形"
+        ],
+        "description": "人形增伤"
+    },
+    "FACTION_DAMAGE_机器": {
+        "names": [
+            "FACTION_DAMAGE_机器"
+        ],
+        "description": "机器增伤"
+    },
+    "FACTION_DAMAGE_ALGAROKDUMMYFACTION": {
+        "names": [
+            "FACTION_DAMAGE_ALGAROKDUMMYFACTION"
+        ],
+        "description": "木靶增伤"
+    },
+    "FACTION_DAMAGE_生物": {
+        "names": [
+            "FACTION_DAMAGE_生物"
+        ],
+        "description": "生物增伤"
+    },
+    "FACTION_DAMAGE_BOSSSUMMON": {
+        "names": [
+            "FACTION_DAMAGE_BOSSSUMMON"
+        ],
+        "description": "BOSS召唤物增伤"
+    },
+    "FACTION_DAMAGE_CGK": {
+        "names": [
+            "FACTION_DAMAGE_CGK"
+        ],
+        "description": "CGK增伤"
+    },
+    "FACTION_DAMAGE_LIGHT": {
+        "names": [
+            "FACTION_DAMAGE_LIGHT"
+        ],
+        "description": "光属性增伤"
+    },
+    "FACTION_DAMAGE_VFX": {
+        "names": [
+            "FACTION_DAMAGE_VFX"
+        ],
+        "description": "特效实体增伤"
+    },
+    "FACTION_DAMAGE_HV_TENEBRIS": {
+        "names": [
+            "FACTION_DAMAGE_HV_TENEBRIS"
+        ],
+        "description": "深渊增伤"
+    },
+    "FACTION_DAMAGE_ICEBOUND": {
+        "names": [
+            "FACTION_DAMAGE_ICEBOUND"
+        ],
+        "description": "冰封增伤"
+    },
+    "FACTION_DAMAGE_伙伴": {
+        "names": [
+            "FACTION_DAMAGE_伙伴"
+        ],
+        "description": "伙伴伤害"
+    },
+    "FACTION_DAMAGE_怪物": {
+        "names": [
+            "FACTION_DAMAGE_怪物"
+        ],
+        "description": "怪物增伤"
+    },
+    "FACTION_DAMAGE_灵体": {
+        "names": [
+            "FACTION_DAMAGE_灵体"
+        ],
+        "description": "灵体增伤"
+    },
+    "FACTION_DAMAGE_RANMOFS": {
+        "names": [
+            "FACTION_DAMAGE_RANMOFS"
+        ],
+        "description": "RANMOFS增伤"
+    },
+    "FACTION_DAMAGE_TALUSKNIGHT": {
+        "names": [
+            "FACTION_DAMAGE_TALUSKNIGHT"
+        ],
+        "description": "泰勒斯骑士增伤"
+    },
+    "FACTION_DAMAGE_机械": {
+        "names": [
+            "FACTION_DAMAGE_机械"
+        ],
+        "description": "机械增伤"
+    },
+    "FACTION_DAMAGE_亡灵": {
+        "names": [
+            "FACTION_DAMAGE_亡灵"
+        ],
+        "description": "亡灵增伤"
+    },
+    "FACTION_DAMAGE_ICE ELEMENTALS": {
+        "names": [
+            "FACTION_DAMAGE_ICE ELEMENTALS"
+        ],
+        "description": "冰元素增伤"
+    },
+    "FACTION_DAMAGE_PET": {
+        "names": [
+            "FACTION_DAMAGE_PET"
+        ],
+        "description": "宠物伤害"
+    }
+}

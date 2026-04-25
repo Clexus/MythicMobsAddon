@@ -13,6 +13,7 @@ import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.adapters.BukkitTriggerMetadata;
 import io.lumine.mythic.bukkit.utils.Events;
+import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.auras.Aura;
 import io.lumine.mythic.core.skills.targeters.ILocationSelector;
@@ -83,14 +84,15 @@ public class OnRealBlockBreakMechanic extends Aura implements ITargetedEntitySki
 
     private class Tracker extends Aura.AuraTracker implements IParentSkill, Runnable {
         public Tracker(SkillMetadata data, AbstractEntity entity) {
-            super(data.getCaster(), entity, data);
+            super(entity, data);
             this.start();
         }
 
         public void auraStart() {
             this.registerAuraComponent(Events.subscribe(BlockBreakEvent.class).filter((event) -> event.getPlayer().getUniqueId().equals(this.entity.get().getUniqueId()) && !event.isCancelled()).filter((event) -> {
                 if (OnRealBlockBreakMechanic.this.blockType != null) {
-                    List<String> wantedBlocks = List.of(OnRealBlockBreakMechanic.this.blockType.get(this.skillMetadata.deepClone()).split(","));
+                    PlaceholderContext context = PlaceholderContext.builder().meta(this.skillMetadata.deepClone()).entity(this.entity.get()).build();
+                    List<String> wantedBlocks = List.of(OnRealBlockBreakMechanic.this.blockType.get(context).split(","));
                     return ILocationSelector.blockMatches(event.getBlock().getType(), wantedBlocks);
                 } else {
                     return true;
@@ -101,7 +103,8 @@ public class OnRealBlockBreakMechanic extends Aura implements ITargetedEntitySki
                 meta.setLocationTarget(target);
                 BukkitTriggerMetadata.apply(meta, event);
                 if (OnRealBlockBreakMechanic.this.blockType != null) {
-                    List<String> wantedBlocks = List.of(OnRealBlockBreakMechanic.this.blockType.get(meta).split(","));
+                    PlaceholderContext context = PlaceholderContext.builder().meta(meta).entity(this.entity.get()).build();
+                    List<String> wantedBlocks = List.of(OnRealBlockBreakMechanic.this.blockType.get(context).split(","));
                     if (!ILocationSelector.blockMatches(event.getBlock().getType(), wantedBlocks)) {
                         return;
                     }

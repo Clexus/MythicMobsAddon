@@ -3,13 +3,11 @@ package cn.clexus.mythicMobsAddon.addons.mechanics;
 import cn.clexus.mythicMobsAddon.events.EntityTrueDamageEvent;
 import io.lumine.mythic.api.adapters.AbstractEntity;
 import io.lumine.mythic.api.config.MythicLineConfig;
-import io.lumine.mythic.api.skills.ITargetedEntitySkill;
-import io.lumine.mythic.api.skills.Skill;
-import io.lumine.mythic.api.skills.SkillMetadata;
-import io.lumine.mythic.api.skills.SkillResult;
+import io.lumine.mythic.api.skills.*;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderDouble;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.utils.Events;
+import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.auras.Aura;
 import org.bukkit.event.EventPriority;
@@ -24,6 +22,7 @@ public class OnTrueDamagedMechanic extends Aura implements ITargetedEntitySkill 
     protected boolean modDamage = false;
     protected PlaceholderDouble damageSub;
     protected PlaceholderDouble damageMult;
+    protected PlaceholderDouble damageSet;
 
     public OnTrueDamagedMechanic(SkillExecutor manager, File file, String skill, MythicLineConfig mlc) {
         super(manager, file, skill, mlc);
@@ -32,13 +31,15 @@ public class OnTrueDamagedMechanic extends Aura implements ITargetedEntitySkill 
 
         String dSub = mlc.getString(new String[]{"damagesub", "sub", "s"}, "0");
         String dMult = mlc.getString(new String[]{"damagemultiplier", "multiplier", "m"}, "1");
+        String dSet = mlc.getString(new String[]{"damageset", "set"}, "-1");
 
-        if (!dSub.equals("0") || !dMult.equals("1")) {
+        if (!dSub.equals("0") || !dMult.equals("1") || !dSet.equals("-1")) {
             this.modDamage = true;
         }
 
         this.damageSub = PlaceholderDouble.of(dSub);
         this.damageMult = PlaceholderDouble.of(dMult);
+        this.damageSet = PlaceholderDouble.of(dSet);
 
         this.getManager().queueSecondPass(() -> {
             if (this.onDamagedSkillName != null) {
@@ -53,9 +54,9 @@ public class OnTrueDamagedMechanic extends Aura implements ITargetedEntitySkill 
         return SkillResult.SUCCESS;
     }
 
-    private class Tracker extends Aura.AuraTracker {
+    private class Tracker extends Aura.AuraTracker implements IParentSkill, Runnable {
         public Tracker(SkillMetadata data, AbstractEntity entity) {
-            super(data.getCaster(), entity, data);
+            super(entity, data);
             this.start();
         }
 
@@ -69,44 +70,15 @@ public class OnTrueDamagedMechanic extends Aura implements ITargetedEntitySkill 
                     .filter(event -> this.entity.isPresent() && event.getEntity().getUniqueId().equals(this.entity.get().getUniqueId()))
                     .handler(this::handleDamageModification));
 
-            // MONITOR 优先级用于执行技能和变量注册
-            this.registerAuraComponent(Events.subscribe(EntityTrueDamageEvent.class, EventPriority.MONITOR)
-                    .filter(event -> !event.isCancelled())
-                    .filter(event -> this.entity.isPresent() && event.getEntity().getUniqueId().equals(this.entity.get().getUniqueId()))
-                    .handler(this::handleSkillTrigger));
-
             this.executeAuraSkill(OnTrueDamagedMechanic.this.onStartSkill, this.skillMetadata);
         }
 
         private void handleDamageModification(EntityTrueDamageEvent event) {
-            if (OnTrueDamagedMechanic.this.cancelDamage) {
-                event.setCancelled(true);
-                return;
-            }
-
-            if (OnTrueDamagedMechanic.this.modDamage) {
-                AbstractEntity attacker = BukkitAdapter.adapt(event.getDamager());
-                SkillMetadata meta = this.skillMetadata.deepClone();
-                meta.setTrigger(attacker);
-
-                double currentDmg = event.getDamage();
-                double sub = OnTrueDamagedMechanic.this.damageSub.get(meta, attacker);
-                double mult = OnTrueDamagedMechanic.this.damageMult.get(meta, attacker);
-
-                // 计算新伤害值: (当前伤害 - 减值) * 倍率
-                double newDmg = (currentDmg - sub) * mult;
-                event.setDamage(Math.max(0, newDmg));
-            }
-        }
-
-        private void handleSkillTrigger(EntityTrueDamageEvent event) {
             var meta = this.skillMetadata.deepClone();
             AbstractEntity attacker = BukkitAdapter.adapt(event.getDamager());
 
-            // 设置触发者为攻击者
             meta.setTrigger(attacker);
 
-            // 注册变量供 MM 技能使用
             meta.getVariables().putDouble("damage-amount", event.getDamage());
 
             // 执行子技能
@@ -115,6 +87,24 @@ public class OnTrueDamagedMechanic extends Aura implements ITargetedEntitySkill 
                     this.consumeCharge();
                 }
             }
+
+            if (OnTrueDamagedMechanic.this.cancelDamage) {
+                event.setCancelled(true);
+                return;
+            }
+
+            if (OnTrueDamagedMechanic.this.modDamage) {
+                PlaceholderContext context = PlaceholderContext.builder().meta(meta).entity(attacker).build();
+
+                double currentDmg = event.getDamage();
+                double sub = OnTrueDamagedMechanic.this.damageSub.get(context);
+                double mult = OnTrueDamagedMechanic.this.damageMult.get(context);
+                double set = OnTrueDamagedMechanic.this.damageSet.get(context);
+
+                double newDmg = set != -1 ? set : (currentDmg - sub) * mult;
+                event.setDamage(Math.max(0, newDmg));
+            }
         }
+
     }
 }

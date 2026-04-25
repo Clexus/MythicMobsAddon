@@ -7,6 +7,7 @@ import io.lumine.mythic.api.skills.SkillMetadata;
 import io.lumine.mythic.api.skills.SkillResult;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.core.logging.MythicLogger;
+import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.SkillMechanic;
 import org.bukkit.NamespacedKey;
@@ -79,7 +80,9 @@ public class SavePDCMechanic extends SkillMechanic implements ITargetedEntitySki
         if(itemStack == null || itemStack.isEmpty()){
             return SkillResult.INVALID_TARGET;
         }
-        itemStack.editMeta(meta -> meta.getPersistentDataContainer().set(namespacedKey, PersistentDataType.STRING, this.data.get(skillMetadata, abstractEntity)));
+        PlaceholderContext context = PlaceholderContext.builder().meta(skillMetadata).entity(abstractEntity).build();
+        String value = this.data.get(context);
+        itemStack.editMeta(meta -> meta.getPersistentDataContainer().set(namespacedKey, PersistentDataType.STRING, value));
         return SkillResult.SUCCESS;
     }
 }
