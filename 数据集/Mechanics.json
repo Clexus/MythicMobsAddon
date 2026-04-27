@@ -75,6 +75,54 @@
         ]
     },
     {
+        "plugin": "CMisc",
+        "class": "OnResourceUpdateMechanic",
+        "extends": "AuraMechanic",
+        "implements": [
+            "ITargetedEntitySkill"
+        ],
+        "name": [
+            "onresourceupdate",
+            "onresource",
+            "oru"
+        ],
+        "description": "监听 MMOCore 的 PlayerResourceUpdateEvent 光环技能。\n\n| 光环内占位符 |\n|--------------------------------|\n| `<skill.var.resource>` (资源类型) |\n| `<skill.var.amount>` (本次变化值；与 difference 相同) |\n| `<skill.var.difference>` (变化差值) |\n| `<skill.var.new-amount>` (变更后资源值) |\n| `<skill.var.original-new-amount>` (原始变更后资源值) |\n| `<skill.var.old-amount>` (变更前资源值) |\n| `<skill.var.reason>` (变更原因) |\n| `<skill.var.player>` (玩家名) |",
+        "attributes": [
+            {
+                "name": ["onresourceupdateskill", "onupdateskill", "onresourceupdate", "oru", "ou"],
+                "type": "Skill",
+                "description": "资源变化时执行的子技能"
+            },
+            {
+                "name": ["cancelevent", "ce"],
+                "type": "Boolean",
+                "description": "是否取消该次资源更新事件",
+                "default_value": "false"
+            }
+        ]
+    },
+    {
+        "plugin": "CMisc",
+        "class": "OnVexUpdateMechanic",
+        "extends": "AuraMechanic",
+        "implements": [
+            "ITargetedEntitySkill"
+        ],
+        "name": [
+            "onvexupdate",
+            "onvex",
+            "ovu"
+        ],
+        "description": "监听 DrcomoVEX 的 PlayerVariableChangeEvent 光环技能。\n\n| 光环内占位符 |\n|--------------------------------|\n| `<skill.var.id>` (变量键名) |\n| `<skill.var.old-value>` (变更前值) |\n| `<skill.var.new-value>` (变更后值) |\n| `<skill.var.change-value>` (变化值) |\n| `<skill.var.reason>` (变更原因) |\n| `<skill.var.player>` (玩家名) |",
+        "attributes": [
+            {
+                "name": ["onvexupdateskill", "onupdateskill", "onvexupdate", "ovu", "ou"],
+                "type": "Skill",
+                "description": "变量变化时执行的子技能"
+            }
+        ]
+    },
+    {
         "plugin": "AttributeBinder",
         "class": "ABBMechanic",
         "extends": "SkillMechanic",

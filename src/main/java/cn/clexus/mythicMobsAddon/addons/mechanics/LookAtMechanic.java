@@ -20,7 +20,7 @@ public class LookAtMechanic extends SkillMechanic implements ITargetedEntitySkil
 
     public LookAtMechanic(SkillExecutor manager, File file, String line, MythicLineConfig mlc) {
         super(manager, file, line, mlc);
-        lookAnchor = mlc.getEnum(new String[]{"lookanchor", "la"}, LookAnchor.class, LookAnchor.EYES);
+        lookAnchor = mlc.getEnum(new String[]{"lookanchor", "la"}, LookAnchor.class, LookAnchor.FEET);
     }
 
     @Override
