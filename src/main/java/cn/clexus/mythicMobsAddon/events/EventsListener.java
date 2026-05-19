@@ -298,6 +298,10 @@ public class EventsListener implements Listener {
             event.register(new OnEffectMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m,"ontruedamaged", "ontruedamage")) {
             event.register(new OnTrueDamagedMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "ontrueattack", "ontrueatk")) {
+            event.register(new OnTrueAttackMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "confuse")) {
+            event.register(new ConfuseMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "removeattributemodifier", "removemodifier", "ram")) {
             event.register(new RemoveAttributeModifierMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "lookat")) {

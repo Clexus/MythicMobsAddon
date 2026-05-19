@@ -4,7 +4,6 @@ import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import io.lumine.mythic.core.skills.placeholders.types.EntityScopedPlaceholder;
 import io.lumine.mythic.core.skills.placeholders.types.NumericEntityScopedPlaceholder;
 import io.lumine.mythic.core.utils.annotations.MythicPlaceholder;
-import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 @MythicPlaceholder(placeholder = "height")
@@ -21,10 +20,7 @@ public class HeightPlaceholder extends NumericEntityScopedPlaceholder {
             return 0D;
         }
         var bukkitEntity = entity.getBukkitEntity();
-        if (!(bukkitEntity instanceof LivingEntity livingEntity)) {
-            return 0D;
-        }
-        return livingEntity.getHeight();
+        return bukkitEntity.getHeight();
     }
 }
 

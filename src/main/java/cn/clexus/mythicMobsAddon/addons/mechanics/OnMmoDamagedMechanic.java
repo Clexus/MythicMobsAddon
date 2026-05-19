@@ -123,10 +123,9 @@ public class OnMmoDamagedMechanic extends Aura implements ITargetedEntitySkill {
                 DamageMetadata damageMeta = event.getAttack().getDamage();
 
                 if (typeStr == null || typeStr.isEmpty()) {
-                    if(set != -1){
-                        damageMeta.multiplicativeModifier(0);
-                        damageMeta.add(set);
-                    }else{
+                    if (set != -1) {
+                        damageMeta.multiplicativeModifier(set / damageMeta.getDamage());
+                    } else {
                         // 全局修改
                         if (sub != 0) damageMeta.add(-sub);
                         if (mult != 1) damageMeta.multiplicativeModifier(mult);
@@ -135,19 +134,18 @@ public class OnMmoDamagedMechanic extends Aura implements ITargetedEntitySkill {
                     try {
                         DamageType dType = DamageType.valueOf(typeStr.toUpperCase());
                         // 特定类型修改
-                        if(set != -1){
-                            damageMeta.multiplicativeModifier(0, dType);
-                            damageMeta.add(set, dType);
-                        }else{
+                        if (set != -1) {
+                            damageMeta.multiplicativeModifier(set / damageMeta.getDamage(dType), dType);
+                        } else {
                             if (sub != 0) damageMeta.add(-sub, dType);
                             if (mult != 1) damageMeta.multiplicativeModifier(mult, dType);
                         }
                     } catch (IllegalArgumentException e) {
                         // 回退
-                        if(set != -1){
+                        if (set != -1) {
                             damageMeta.multiplicativeModifier(0);
                             damageMeta.add(set);
-                        }else{
+                        } else {
                             // 全局修改
                             if (sub != 0) damageMeta.add(-sub);
                             if (mult != 1) damageMeta.multiplicativeModifier(mult);
