@@ -43,6 +43,7 @@ public class ConfuseMechanic extends Aura implements ITargetedEntitySkill {
     private class Tracker extends Aura.AuraTracker {
         private HolderState holderState;
         private final List<AbstractEntity> targets;
+        private UUID lastTargetId;
 
         public Tracker(SkillMetadata data, AbstractEntity entity, List<AbstractEntity> targets) {
             super(entity, data);
@@ -69,14 +70,40 @@ public class ConfuseMechanic extends Aura implements ITargetedEntitySkill {
             mob.setParent(null);
             mob.setFaction(UUID.randomUUID().toString());
 
-            AbstractEntity newTarget = selectNonSelfTarget(targets, this.entity.get().getUniqueId());
+            AbstractEntity newTarget = selectNextTarget(this.entity.get().getUniqueId());
             if (newTarget != null) {
                 mob.setTarget(newTarget);
+                this.lastTargetId = newTarget.getUniqueId();
             } else {
                 mob.resetTarget();
+                this.lastTargetId = null;
             }
 
             this.executeAuraSkill(ConfuseMechanic.this.onStartSkill, this.skillMetadata);
+        }
+
+        @Override
+        public void auraTick() {
+            super.auraTick();
+            if (this.entity.isEmpty() || this.holderState == null) {
+                return;
+            }
+
+            ActiveMob mob = MythicBukkit.inst().getMobManager().getMythicMobInstance(this.entity.get());
+            if (mob == null) {
+                return;
+            }
+
+            if (!isTargetValid(this.lastTargetId, this.entity.get().getUniqueId())) {
+                AbstractEntity newTarget = selectNextTarget(this.entity.get().getUniqueId());
+                if (newTarget != null) {
+                    mob.setTarget(newTarget);
+                    this.lastTargetId = newTarget.getUniqueId();
+                } else {
+                    mob.resetTarget();
+                    this.lastTargetId = null;
+                }
+            }
         }
 
         @Override
@@ -100,26 +127,66 @@ public class ConfuseMechanic extends Aura implements ITargetedEntitySkill {
                 mob.setFaction(this.holderState.faction);
             }
             mob.resetTarget();
+            this.lastTargetId = null;
 
             this.executeAuraSkill(ConfuseMechanic.this.onEndSkill, this.skillMetadata);
         }
 
-        private AbstractEntity selectNonSelfTarget(List<AbstractEntity> targets, UUID selfId) {
+        private boolean isTargetValid(UUID targetId, UUID selfId) {
+            if (targetId == null) {
+                return false;
+            }
+
+            if (targetId.equals(selfId)) {
+                return false;
+            }
+
+            Entity entity = Bukkit.getEntity(targetId);
+            return entity != null && entity.isValid();
+        }
+
+        private AbstractEntity selectNextTarget(UUID selfId) {
             if (targets == null || targets.isEmpty()) {
                 return null;
             }
 
-            for (AbstractEntity target : targets) {
-                if (!target.getBukkitEntity().isValid()) {
-                    targets.remove(target);
+            List<AbstractEntity> validTargets = new ArrayList<>();
+            for (Iterator<AbstractEntity> iterator = targets.iterator(); iterator.hasNext(); ) {
+                AbstractEntity target = iterator.next();
+                if (target == null || target.getBukkitEntity() == null || !target.getBukkitEntity().isValid()) {
+                    iterator.remove();
                     continue;
                 }
-                if (!target.getUniqueId().equals(selfId)) {
-                    return target;
+                validTargets.add(target);
+            }
+
+            if (validTargets.size() <= 1) {
+                return null;
+            }
+
+            int selfIndex = -1;
+            for (int i = 0; i < validTargets.size(); i++) {
+                if (validTargets.get(i).getUniqueId().equals(selfId)) {
+                    selfIndex = i;
+                    break;
                 }
             }
 
-            return null;
+            if (selfIndex < 0) {
+                for (AbstractEntity target : validTargets) {
+                    if (!target.getUniqueId().equals(selfId)) {
+                        return target;
+                    }
+                }
+                return null;
+            }
+
+            int targetIndex = (selfIndex + 1) % validTargets.size();
+            AbstractEntity selected = validTargets.get(targetIndex);
+            if (selected.getUniqueId().equals(selfId)) {
+                return null;
+            }
+            return selected;
         }
 
         private SkillCaster resolveParentCaster(UUID uuid) {
