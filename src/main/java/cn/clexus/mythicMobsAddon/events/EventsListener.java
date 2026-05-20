@@ -5,6 +5,7 @@ import cn.clexus.mythicMobsAddon.addons.mechanics.*;
 import cn.clexus.mythicMobsAddon.addons.targeters.*;
 import cn.clexus.mythicMobsAddon.addons.triggers.*;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import com.destroystokyo.paper.event.entity.ExperienceOrbMergeEvent;
 import com.destroystokyo.paper.event.entity.WitchConsumePotionEvent;
 import com.destroystokyo.paper.event.entity.WitchThrowPotionEvent;
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
@@ -33,6 +34,7 @@ import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -44,10 +46,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class EventsListener implements Listener {
     MythicBukkit mythicBukkit = MythicBukkit.inst();
@@ -348,6 +347,25 @@ public class EventsListener implements Listener {
         } else if (eq(name, "os","originsphere")) {
             event.register(new OriginSphere(event.getContainer().getManager(), event.getConfig()));
         }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onExpMerge(ExperienceOrbMergeEvent event) {
+        List<ExperienceOrb> orbs = new ArrayList<>();
+        orbs.add(event.getMergeSource());
+        orbs.add(event.getMergeTarget());
+        orbs.forEach(orb -> {
+            if(mobManager.isMythicMob(orb)){
+                ActiveMob am = mobManager.getMythicMobInstance(orb);
+                if (am == null) return;
+                MythicConfig options = am.getType().getConfig().getNestedConfig("Options");
+                if (options.isSet("CancelMerge")) {
+                    if (options.getBoolean("CancelMerge")) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        });
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
