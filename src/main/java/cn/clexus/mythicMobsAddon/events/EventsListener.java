@@ -2,14 +2,12 @@ package cn.clexus.mythicMobsAddon.events;
 
 import cn.clexus.mythicMobsAddon.addons.conditions.*;
 import cn.clexus.mythicMobsAddon.addons.mechanics.*;
-import cn.clexus.mythicMobsAddon.addons.targeters.RandomLocationsOfBoundingBoxTargeter;
-import cn.clexus.mythicMobsAddon.addons.targeters.RandomLocationsOfTargetsBoundingBoxTargeter;
-import cn.clexus.mythicMobsAddon.addons.targeters.SourceOwner;
-import cn.clexus.mythicMobsAddon.addons.targeters.TeamTargeter;
+import cn.clexus.mythicMobsAddon.addons.targeters.*;
 import cn.clexus.mythicMobsAddon.addons.triggers.*;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import com.destroystokyo.paper.event.entity.WitchConsumePotionEvent;
 import com.destroystokyo.paper.event.entity.WitchThrowPotionEvent;
+import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import io.lumine.mythic.api.config.MythicConfig;
 import io.lumine.mythic.api.mobs.MythicMob;
 import io.lumine.mythic.api.skills.SkillMetadata;
@@ -306,6 +304,9 @@ public class EventsListener implements Listener {
             event.register(new RemoveAttributeModifierMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
         } else if (eq(m, "lookat")) {
             event.register(new LookAtMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+        } else if (eq(m, "setvisualfire", "visualfire")) {
+            event.register(new SetVisualFireMechanic(event.getContainer().getManager(), event.getContainer().getFile(), event.getConfig().getLine(), event.getConfig()));
+
         }
     }
 
@@ -328,6 +329,8 @@ public class EventsListener implements Listener {
             event.register(new SimpleBlockTypeCondition(event.getConfig(), 0));
         } else if (eq(name, "sonblock")) {
             event.register(new SimpleBlockTypeCondition(event.getConfig(), 0.6));
+        } else if (eq(name, "visualfire")) {
+            event.register(new VisualFireCondition(event.getConfig()));
         }
     }
 
@@ -342,6 +345,23 @@ public class EventsListener implements Listener {
             event.register(new RandomLocationsOfBoundingBoxTargeter(event.getContainer().getManager(), event.getConfig()));
         } else if (eq(name, "randomlocationsoftargetsboundingbox", "rlotbb", "rltbb")) {
             event.register(new RandomLocationsOfTargetsBoundingBoxTargeter(event.getContainer().getManager(), event.getConfig()));
+        } else if (eq(name, "os","originsphere")) {
+            event.register(new OriginSphere(event.getContainer().getManager(), event.getConfig()));
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onExpPickUp(PlayerPickupExperienceEvent event) {
+        var e = event.getExperienceOrb();
+        OnExpPickedUpTrigger.ExpPickedUpMeta meta = new OnExpPickedUpTrigger.ExpPickedUpMeta();
+        if(mobManager.isMythicMob(e)){
+            ActiveMob am = mobManager.getMythicMobInstance(e);
+            if (am == null) return;
+            SkillMetadata data = eventExecutor.buildSkillMetadata(OnExpPickedUpTrigger.onExpPickedUp, meta, am, BukkitAdapter.adapt(event.getPlayer()), BukkitAdapter.adapt(e.getLocation()), true);
+            TriggeredSkill ts = eventExecutor.processTriggerMechanics(data, meta);
+            if (ts.getCancelled()) {
+                event.setCancelled(true);
+            }
         }
     }
 

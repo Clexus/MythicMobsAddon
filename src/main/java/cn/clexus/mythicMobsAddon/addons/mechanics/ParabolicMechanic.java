@@ -91,7 +91,7 @@ public class ParabolicMechanic extends Projectile implements ITargetedEntitySkil
             double topY = Math.max(this.startLocation.getY(), this.target.getY()) + tyo;
             double topHeight = topY - this.startLocation.getY();
 
-            this.gravity = ParabolicMechanic.this.projectileGravity.get(this.data) / ParabolicMechanic.this.ticksPerSecond;
+            this.gravity = ParabolicMechanic.this.projectileGravity.get(this.data) / this.ticksPerSecond;
             if (ParabolicMechanic.this.tickInterpolation > 0) this.gravity /= (ParabolicMechanic.this.tickInterpolation + 1);
 
             double v0y = Math.sqrt(2.0 * this.gravity * topHeight);

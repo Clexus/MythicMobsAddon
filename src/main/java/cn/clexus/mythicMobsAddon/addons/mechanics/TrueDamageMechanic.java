@@ -10,11 +10,11 @@ import io.lumine.mythic.api.skills.SkillResult;
 import io.lumine.mythic.api.skills.ThreadSafetyLevel;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderBoolean;
 import io.lumine.mythic.api.skills.placeholders.PlaceholderDouble;
+import io.lumine.mythic.api.skills.placeholders.PlaceholderString;
 import io.lumine.mythic.core.skills.SkillExecutor;
 import io.lumine.mythic.core.skills.SkillMechanic;
 import io.lumine.mythic.core.skills.placeholders.PlaceholderContext;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.craftbukkit.damage.CraftDamageSource;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.damage.DamageSource;
@@ -30,6 +30,8 @@ public class TrueDamageMechanic extends SkillMechanic implements ITargetedEntity
     private final PlaceholderDouble damage;
     private final PlaceholderBoolean damagePlayer;
     private final PlaceholderBoolean ignoreInvulnerable;
+    private final PlaceholderString sound;
+    private final PlaceholderString disabledServer;
 
 
     public TrueDamageMechanic(SkillExecutor manager, File file, String line, MythicLineConfig mlc) {
@@ -39,21 +41,26 @@ public class TrueDamageMechanic extends SkillMechanic implements ITargetedEntity
         this.damage = PlaceholderDouble.of(mlc.getString(new String[]{"damage", "amount", "a", "d"}, "0"));
         this.damagePlayer = PlaceholderBoolean.of(mlc.getString(new String[]{"damageplayer", "dp"}, "false"));
         this.ignoreInvulnerable = PlaceholderBoolean.of(mlc.getString(new String[]{"ignoreinvulnerable", "ii"}, "false"));
-
+        this.sound = PlaceholderString.of(mlc.getString(new String[]{"sound", "s"}, "item.trident.hit"));
+        this.disabledServer = PlaceholderString.of(mlc.getString(new String[]{"disabledServer", "ds"}, "家"));
     }
 
+    public static SkillResult applyTrueDamage(LivingEntity l, LivingEntity c, double damage, boolean damagePlayer, boolean ignoreInvulnerable) {
+        return applyTrueDamage(l, c, damage, damagePlayer, ignoreInvulnerable, "item.trident.hit");
+    }
     /**
      * Apply true damage to a target entity from a caster.
      *
-     * @param l                     target living entity
-     * @param c                     caster living entity
-     * @param damage                damage amount
-     * @param damagePlayer          whether players may be damaged
-     * @param ignoreInvulnerable    whether to ignore invulnerability
+     * @param l                  target living entity
+     * @param c                  caster living entity
+     * @param damage             damage amount
+     * @param damagePlayer       whether players may be damaged
+     * @param ignoreInvulnerable whether to ignore invulnerability
+     * @param sound              sound to play on hit
      * @return SkillResult indicating the result of the operation
      */
     @SuppressWarnings("removal")
-    public static SkillResult applyTrueDamage(LivingEntity l, LivingEntity c, double damage, boolean damagePlayer, boolean ignoreInvulnerable) {
+    public static SkillResult applyTrueDamage(LivingEntity l, LivingEntity c, double damage, boolean damagePlayer, boolean ignoreInvulnerable, String sound) {
         if (!damagePlayer && l instanceof Player) return SkillResult.INVALID_TARGET;
         if (!l.isValid() || (l.isInvulnerable() && !ignoreInvulnerable)) return SkillResult.INVALID_TARGET;
         if (damage <= 0) return SkillResult.INVALID_CONFIG;
@@ -71,7 +78,7 @@ public class TrueDamageMechanic extends SkillMechanic implements ITargetedEntity
             return SkillResult.INVALID_TARGET;
         }
         l.playHurtAnimation(0);
-        l.getWorld().playSound(l, Sound.ITEM_TRIDENT_HIT, 1, 1);
+        l.getWorld().playSound(l, sound, 1, 1);
 
         var e = new EntityDamageByEntityEvent(c, l, EntityDamageEvent.DamageCause.ENTITY_ATTACK, source, damage);
         if (health == 0) {
@@ -79,9 +86,9 @@ public class TrueDamageMechanic extends SkillMechanic implements ITargetedEntity
             cL.getHandle().die(((CraftDamageSource) source).getHandle());
         }
         cL.getHandle().setHealth(health);
-        if(!(l instanceof Player)){
+        if (!(l instanceof Player)) {
             l.getScheduler().runAtFixedRate(MythicMobsAddon.plugin, task -> {
-                if (!l.isValid()){
+                if (!l.isValid()) {
                     l.setHealth(0);
                     task.cancel();
                 }
@@ -93,14 +100,16 @@ public class TrueDamageMechanic extends SkillMechanic implements ITargetedEntity
 
     @Override
     public SkillResult castAtEntity(SkillMetadata skillMetadata, AbstractEntity abstractEntity) {
-        if (MythicMobsAddon.plugin.getServer().getName().equals("家")) return SkillResult.CONDITION_FAILED;
-        if (!(abstractEntity.getBukkitEntity() instanceof LivingEntity l) || !(skillMetadata.getCaster().getEntity().getBukkitEntity() instanceof LivingEntity c))
-            return SkillResult.INVALID_TARGET;
         PlaceholderContext context = PlaceholderContext.builder().meta(skillMetadata).entity(abstractEntity).build();
+        if (MythicMobsAddon.plugin.getServer().getName().contains(this.disabledServer.get(context))) return SkillResult.CONDITION_FAILED;
+        if (!(abstractEntity.getBukkitEntity() instanceof LivingEntity l) || !(skillMetadata.getCaster().getEntity().getBukkitEntity() instanceof LivingEntity c)) {
+            return SkillResult.INVALID_TARGET;
+        }
         double dmg = this.damage.get(context);
         boolean dp = this.damagePlayer.get(context);
         boolean ii = this.ignoreInvulnerable.get(context);
+        String sound = this.sound.get(context);
 
-        return applyTrueDamage(l, c, dmg, dp, ii);
+        return applyTrueDamage(l, c, dmg, dp, ii, sound);
     }
 }
