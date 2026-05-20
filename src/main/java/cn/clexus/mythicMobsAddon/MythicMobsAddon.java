@@ -7,18 +7,18 @@ import cn.clexus.mythicMobsAddon.events.EventsListener;
 import cn.clexus.mythicMobsAddon.events.MMOItemsEventsListener;
 import cn.clexus.mythicMobsAddon.support.CrucibleSupport;
 import cn.clexus.mythicMobsAddon.support.MMOItemsSupport;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.core.skills.CustomComponentRegistry;
-import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.FinePositionResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.EntitySelectorArgumentResolver;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
@@ -172,6 +172,7 @@ public final class MythicMobsAddon extends JavaPlugin {
         OnTrueDamagedTrigger.register();
         OnWitchThrowPotionTrigger.register();
         OnWitchConsumePotionTrigger.register();
+        OnExpPickedUpTrigger.register();
     }
 
     @Override
